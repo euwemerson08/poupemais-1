@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Wallet,
-  ShoppingCart,
   CreditCard,
   Landmark,
   Target,
@@ -38,14 +37,14 @@ export const SidebarContent = () => {
         <NavLink href="/accounts" icon={<Wallet size={20} />} active={pathname === "/accounts"}>
           Contas
         </NavLink>
+        <NavLink href="/transactions" icon={<ArrowRightLeft size={20} />} active={pathname === "/transactions"}>
+          Transações
+        </NavLink>
         <NavLink href="/credit-cards" icon={<CreditCard size={20} />} active={pathname === "/credit-cards"}>
           Cartões de Crédito
         </NavLink>
         <NavLink href="/invoices" icon={<Receipt size={20} />} active={pathname === "/invoices"}>
           Faturas
-        </NavLink>
-        <NavLink href="#" icon={<ShoppingCart size={20} />}>
-          Compras
         </NavLink>
         <NavLink href="#" icon={<Landmark size={20} />}>
           Despesas Fixas
@@ -55,9 +54,6 @@ export const SidebarContent = () => {
         </NavLink>
         <NavLink href="#" icon={<CalendarPlus size={20} />}>
           Contas a Receber
-        </NavLink>
-        <NavLink href="#" icon={<ArrowRightLeft size={20} />}>
-          Transferências
         </NavLink>
         <NavLink href="#" icon={<List size={20} />}>
           Listas de Compras
