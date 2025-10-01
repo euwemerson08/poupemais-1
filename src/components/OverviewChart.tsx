@@ -3,16 +3,11 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const data = [
-  { name: "Jan", Receitas: 4000, Despesas: 2400 },
-  { name: "Fev", Receitas: 3000, Despesas: 1398 },
-  { name: "Mar", Receitas: 2000, Despesas: 9800 },
-  { name: "Abr", Receitas: 2780, Despesas: 3908 },
-  { name: "Mai", Receitas: 1890, Despesas: 4800 },
-  { name: "Jun", Receitas: 2390, Despesas: 3800 },
-];
+interface OverviewChartProps {
+  data: { name: string; Receitas: number; Despesas: number; }[];
+}
 
-export const OverviewChart = () => {
+export const OverviewChart = ({ data }: OverviewChartProps) => {
   return (
     <Card className="bg-card border-none h-full">
       <CardHeader>
