@@ -11,7 +11,7 @@ export interface Transaction {
   total_installments: number | null;
   category_name: string | null;
   category_icon: string | null;
-  accounts: (Pick<Account, 'name' | 'type'> & { id: string }) | null;
+  accounts: Pick<Account, 'name' | 'type'> | null;
 }
 
 export type TransactionFormData = {
