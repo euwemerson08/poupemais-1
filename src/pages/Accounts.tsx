@@ -1,13 +1,19 @@
-import { Wallet, Landmark, CreditCard } from "lucide-react";
+import { Wallet, Landmark, CreditCard, Loader2 } from "lucide-react";
 import { AccountCard } from "@/components/AccountCard";
 import { AddAccountDialog } from "@/components/AddAccountDialog";
 import { Account, AccountIcon } from "@/types/account";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { showError } from "@/utils/toast";
 
-const accountsData: Account[] = [
-  { id: '1', name: 'Carteira', type: 'wallet', balance: 150.75, color: '#22c55e', icon: 'wallet' },
-  { id: '2', name: 'Banco Principal', type: 'checking', balance: 3500.00, color: '#3b82f6', icon: 'landmark' },
-  { id: '3', name: 'Cartão de Crédito', type: 'credit_card', balance: 850.20, color: '#ef4444', icon: 'credit_card', limit: 5000.00 },
-];
+const getAccounts = async (): Promise<Account[]> => {
+  const { data, error } = await supabase.from("accounts").select("*");
+  if (error) {
+    showError("Erro ao buscar contas.");
+    throw new Error(error.message);
+  }
+  return data as Account[];
+};
 
 const getIconComponent = (icon: AccountIcon, colorClass: string) => {
   const icons = {
@@ -23,11 +29,21 @@ const getCardStyles = (color: string) => {
     '#22c55e': { bg: 'bg-green-500/20', text: 'text-green-400', gradient: 'from-green-900/70 to-green-900/40' },
     '#3b82f6': { bg: 'bg-blue-500/20', text: 'text-blue-400', gradient: 'from-blue-900/70 to-blue-900/40' },
     '#ef4444': { bg: 'bg-red-500/20', text: 'text-red-400', gradient: 'from-red-900/70 to-red-900/40' },
+    '#a855f7': { bg: 'bg-purple-500/20', text: 'text-purple-400', gradient: 'from-purple-900/70 to-purple-900/40' },
+    '#14b8a6': { bg: 'bg-cyan-500/20', text: 'text-cyan-400', gradient: 'from-cyan-900/70 to-cyan-900/40' },
+    '#f59e0b': { bg: 'bg-yellow-500/20', text: 'text-yellow-400', gradient: 'from-yellow-900/70 to-yellow-900/40' },
+    '#ec4899': { bg: 'bg-pink-500/20', text: 'text-pink-400', gradient: 'from-pink-900/70 to-pink-900/40' },
+    '#f97316': { bg: 'bg-orange-500/20', text: 'text-orange-400', gradient: 'from-orange-900/70 to-orange-900/40' },
   };
-  return colorMap[color] || colorMap['#22c55e'];
+  return colorMap[color] || colorMap['#3b82f6'];
 };
 
 const Accounts = () => {
+  const { data: accounts, isLoading } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: getAccounts,
+  });
+
   return (
     <div>
       <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
@@ -40,23 +56,29 @@ const Accounts = () => {
         <AddAccountDialog />
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {accountsData.map((account) => {
-          const styles = getCardStyles(account.color);
-          return (
-            <AccountCard
-              key={account.id}
-              account={account}
-              icon={
-                <div className={`${styles.bg} p-3 rounded-full`}>
-                  {getIconComponent(account.icon, styles.text)}
-                </div>
-              }
-              className={`bg-gradient-to-br ${styles.gradient}`}
-            />
-          );
-        })}
-      </section>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {accounts?.map((account) => {
+            const styles = getCardStyles(account.color);
+            return (
+              <AccountCard
+                key={account.id}
+                account={account}
+                icon={
+                  <div className={`${styles.bg} p-3 rounded-full`}>
+                    {getIconComponent(account.icon, styles.text)}
+                  </div>
+                }
+                className={`bg-gradient-to-br ${styles.gradient}`}
+              />
+            );
+          })}
+        </section>
+      )}
     </div>
   );
 };

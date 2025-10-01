@@ -5,7 +5,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,24 +20,60 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Wallet, Landmark, CreditCard, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { accountSchema, AccountFormData } from "@/types/account";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { showError, showSuccess } from "@/utils/toast";
 
 const colors = [
-  "#3b82f6", // blue
-  "#22c55e", // green
-  "#a855f7", // purple
-  "#ef4444", // red
-  "#14b8a6", // cyan
-  "#f59e0b", // yellow
-  "#ec4899", // pink
-  "#f97316", // orange
+  "#3b82f6", "#22c55e", "#a855f7", "#ef4444",
+  "#14b8a6", "#f59e0b", "#ec4899", "#f97316",
 ];
 
+const createAccount = async (account: Omit<AccountFormData, 'id'>) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Usuário não autenticado");
+
+  const { error } = await supabase.from("accounts").insert({ ...account, user_id: user.id });
+  if (error) throw new Error(error.message);
+};
+
 export const AddAccountDialog = () => {
-  const [selectedIcon, setSelectedIcon] = useState("wallet");
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<AccountFormData>({
+    resolver: zodResolver(accountSchema),
+    defaultValues: {
+      type: "wallet",
+      icon: "wallet",
+      color: colors[0],
+    },
+  });
+
+  const selectedIcon = watch("icon");
+  const selectedColor = watch("color");
+
+  const mutation = useMutation({
+    mutationFn: createAccount,
+    onSuccess: () => {
+      showSuccess("Conta criada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      setOpen(false);
+    },
+    onError: () => {
+      showError("Erro ao criar conta.");
+    },
+  });
+
+  const onSubmit = (data: AccountFormData) => {
+    mutation.mutate(data);
+  };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-[#E63980] hover:bg-[#d63374] text-white font-semibold">
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Conta
@@ -48,76 +83,66 @@ export const AddAccountDialog = () => {
         <DialogHeader>
           <DialogTitle>Adicionar Nova Conta</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Nome da Conta</Label>
-            <Input id="name" placeholder="Ex: Carteira, Banco Principal" className="bg-background" />
+            <Input id="name" {...register("name")} placeholder="Ex: Carteira" className="bg-background" />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="type">Tipo de Conta</Label>
-            <Select defaultValue="wallet">
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wallet">Carteira</SelectItem>
-                <SelectItem value="checking">Conta Corrente</SelectItem>
-                <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="wallet">Carteira</SelectItem>
+                    <SelectItem value="checking">Conta Corrente</SelectItem>
+                    <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="balance">Saldo Inicial</Label>
-            <Input id="balance" placeholder="R$ 0,00" className="bg-background" />
+            <Input id="balance" {...register("balance")} placeholder="R$ 0,00" className="bg-background" />
+            {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label>Ícone</Label>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={selectedIcon}
-              onValueChange={(value) => value && setSelectedIcon(value)}
-              className="justify-start gap-2"
-            >
-              <ToggleGroupItem value="wallet" aria-label="Wallet" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <Wallet className="h-5 w-5" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="landmark" aria-label="Landmark" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <Landmark className="h-5 w-5" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="credit_card" aria-label="Credit Card" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <CreditCard className="h-5 w-5" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <Controller
+              name="icon"
+              control={control}
+              render={({ field }) => (
+                <ToggleGroup type="single" variant="outline" value={field.value} onValueChange={field.onChange} className="justify-start gap-2">
+                  <ToggleGroupItem value="wallet" aria-label="Wallet"><Wallet className="h-5 w-5" /></ToggleGroupItem>
+                  <ToggleGroupItem value="landmark" aria-label="Landmark"><Landmark className="h-5 w-5" /></ToggleGroupItem>
+                  <ToggleGroupItem value="credit_card" aria-label="Credit Card"><CreditCard className="h-5 w-5" /></ToggleGroupItem>
+                </ToggleGroup>
+              )}
+            />
           </div>
           <div className="grid gap-2">
             <Label>Cor</Label>
             <div className="flex flex-wrap gap-2">
               {colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={cn(
-                    "w-8 h-8 rounded-full transition-all",
-                    selectedColor === color && "ring-2 ring-offset-2 ring-offset-card ring-primary"
-                  )}
+                <button type="button" key={color} onClick={() => setValue("color", color)}
+                  className={cn("w-8 h-8 rounded-full transition-all", selectedColor === color && "ring-2 ring-offset-2 ring-offset-card ring-primary")}
                   style={{ backgroundColor: color }}
-                  aria-label={`Select color ${color}`}
                 />
               ))}
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancelar
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button type="submit" className="bg-[#E63980] hover:bg-[#d63374] text-white" disabled={mutation.isPending}>
+              {mutation.isPending ? "Salvando..." : "Salvar"}
             </Button>
-          </DialogClose>
-          <Button type="submit" className="bg-[#E63980] hover:bg-[#d63374] text-white">
-            Salvar
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

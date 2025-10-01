@@ -11,6 +11,14 @@ import { useState } from "react";
 import { EditAccountDialog } from "./EditAccountDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { Account } from "@/types/account";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { showError, showSuccess } from "@/utils/toast";
+
+const deleteAccount = async (id: string) => {
+  const { error } = await supabase.from("accounts").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+};
 
 interface AccountCardProps {
   account: Account;
@@ -21,13 +29,24 @@ interface AccountCardProps {
 export const AccountCard = ({ account, icon, className }: AccountCardProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const typeLabels = { wallet: 'Wallet', checking: 'Checking', credit_card: 'Credit Card' };
   const balanceLabel = account.type === 'credit_card' ? 'Fatura Atual' : 'Saldo';
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: () => {
+      showSuccess("Conta excluída com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+    onError: () => {
+      showError("Erro ao excluir conta.");
+    },
+  });
+
   const handleConfirmDelete = () => {
-    console.log(`Deleting account ${account.id}`);
-    // Aqui entraria a lógica para deletar a conta do banco de dados
+    deleteMutation.mutate(account.id);
     setIsDeleteDialogOpen(false);
   };
 
@@ -65,16 +84,18 @@ export const AccountCard = ({ account, icon, className }: AccountCardProps) => {
         </div>
         <div className="mt-auto">
           <p className="text-sm text-gray-300">{balanceLabel}</p>
-          <p className="text-3xl font-bold">R$ {account.balance.toFixed(2).replace('.', ',')}</p>
-          {account.limit && <p className="text-sm text-gray-400 mt-1">Limite: R$ {account.limit.toFixed(2).replace('.', ',')}</p>}
+          <p className="text-3xl font-bold">R$ {Number(account.balance).toFixed(2).replace('.', ',')}</p>
+          {account.limit && <p className="text-sm text-gray-400 mt-1">Limite: R$ {Number(account.limit).toFixed(2).replace('.', ',')}</p>}
         </div>
       </Card>
 
-      <EditAccountDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        account={account}
-      />
+      {isEditDialogOpen && (
+        <EditAccountDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          account={account}
+        />
+      )}
       <DeleteAccountDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

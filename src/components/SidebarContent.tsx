@@ -15,9 +15,14 @@ import {
 } from "lucide-react";
 import { NavLink } from "./NavLink";
 import { useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const SidebarContent = () => {
   const { pathname } = useLocation();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -60,10 +65,14 @@ export const SidebarContent = () => {
           Configurações
         </NavLink>
       </nav>
-      <div>
-        <NavLink href="#" icon={<LogOut size={20} />}>
+      <div className="mt-auto">
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-400 hover:bg-white/5 hover:text-white"
+        >
+          <LogOut size={20} />
           Logout
-        </NavLink>
+        </button>
       </div>
     </div>
   );

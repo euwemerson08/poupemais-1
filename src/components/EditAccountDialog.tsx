@@ -4,7 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,20 +17,25 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Wallet, Landmark, CreditCard } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Account } from "@/types/account";
+import { Account, accountSchema, AccountFormData } from "@/types/account";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { showError, showSuccess } from "@/utils/toast";
 
 const colors = [
-  "#3b82f6", // blue
-  "#22c55e", // green
-  "#a855f7", // purple
-  "#ef4444", // red
-  "#14b8a6", // cyan
-  "#f59e0b", // yellow
-  "#ec4899", // pink
-  "#f97316", // orange
+  "#3b82f6", "#22c55e", "#a855f7", "#ef4444",
+  "#14b8a6", "#f59e0b", "#ec4899", "#f97316",
 ];
+
+const updateAccount = async ({ id, ...account }: AccountFormData) => {
+  if (!id) throw new Error("ID da conta é necessário para atualizar.");
+  const { error } = await supabase.from("accounts").update(account).eq("id", id);
+  if (error) throw new Error(error.message);
+};
 
 interface EditAccountDialogProps {
   open: boolean;
@@ -40,21 +44,35 @@ interface EditAccountDialogProps {
 }
 
 export const EditAccountDialog = ({ open, onOpenChange, account }: EditAccountDialogProps) => {
-  const [name, setName] = useState(account.name);
-  const [type, setType] = useState(account.type);
-  const [balance, setBalance] = useState(account.balance.toString());
-  const [selectedIcon, setSelectedIcon] = useState(account.icon);
-  const [selectedColor, setSelectedColor] = useState(account.color);
+  const queryClient = useQueryClient();
+
+  const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<AccountFormData>({
+    resolver: zodResolver(accountSchema),
+  });
 
   useEffect(() => {
     if (account) {
-      setName(account.name);
-      setType(account.type);
-      setBalance(account.balance.toString());
-      setSelectedIcon(account.icon);
-      setSelectedColor(account.color);
+      reset(account);
     }
-  }, [account]);
+  }, [account, reset]);
+
+  const selectedColor = watch("color");
+
+  const mutation = useMutation({
+    mutationFn: updateAccount,
+    onSuccess: () => {
+      showSuccess("Conta atualizada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      onOpenChange(false);
+    },
+    onError: () => {
+      showError("Erro ao atualizar conta.");
+    },
+  });
+
+  const onSubmit = (data: AccountFormData) => {
+    mutation.mutate({ ...data, id: account.id });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,76 +80,58 @@ export const EditAccountDialog = ({ open, onOpenChange, account }: EditAccountDi
         <DialogHeader>
           <DialogTitle>Editar Conta</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Nome da Conta</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="bg-background" />
+            <Input id="name" {...register("name")} className="bg-background" />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="type">Tipo de Conta</Label>
-            <Select value={type} onValueChange={(value) => setType(value as any)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="wallet">Carteira</SelectItem>
-                <SelectItem value="checking">Conta Corrente</SelectItem>
-                <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller name="type" control={control} render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wallet">Carteira</SelectItem>
+                  <SelectItem value="checking">Conta Corrente</SelectItem>
+                  <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                </SelectContent>
+              </Select>
+            )} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="balance">Saldo</Label>
-            <Input id="balance" value={balance} onChange={(e) => setBalance(e.target.value)} className="bg-background" />
+            <Input id="balance" {...register("balance")} className="bg-background" />
+            {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label>Ícone</Label>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={selectedIcon}
-              onValueChange={(value) => value && setSelectedIcon(value as any)}
-              className="justify-start gap-2"
-            >
-              <ToggleGroupItem value="wallet" aria-label="Wallet" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <Wallet className="h-5 w-5" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="landmark" aria-label="Landmark" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <Landmark className="h-5 w-5" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="credit_card" aria-label="Credit Card" className="data-[state=on]:bg-primary/20 data-[state=on]:text-primary data-[state=on]:border-primary">
-                <CreditCard className="h-5 w-5" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <Controller name="icon" control={control} render={({ field }) => (
+              <ToggleGroup type="single" variant="outline" value={field.value} onValueChange={field.onChange} className="justify-start gap-2">
+                <ToggleGroupItem value="wallet"><Wallet className="h-5 w-5" /></ToggleGroupItem>
+                <ToggleGroupItem value="landmark"><Landmark className="h-5 w-5" /></ToggleGroupItem>
+                <ToggleGroupItem value="credit_card"><CreditCard className="h-5 w-5" /></ToggleGroupItem>
+              </ToggleGroup>
+            )} />
           </div>
           <div className="grid gap-2">
             <Label>Cor</Label>
             <div className="flex flex-wrap gap-2">
               {colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={cn(
-                    "w-8 h-8 rounded-full transition-all",
-                    selectedColor === color && "ring-2 ring-offset-2 ring-offset-card ring-primary"
-                  )}
+                <button type="button" key={color} onClick={() => setValue("color", color)}
+                  className={cn("w-8 h-8 rounded-full transition-all", selectedColor === color && "ring-2 ring-offset-2 ring-offset-card ring-primary")}
                   style={{ backgroundColor: color }}
-                  aria-label={`Select color ${color}`}
                 />
               ))}
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancelar
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="submit" className="bg-[#E63980] hover:bg-[#d63374] text-white" disabled={mutation.isPending}>
+              {mutation.isPending ? "Salvando..." : "Salvar Alterações"}
             </Button>
-          </DialogClose>
-          <Button type="submit" className="bg-[#E63980] hover:bg-[#d63374] text-white">
-            Salvar Alterações
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Accounts from "./pages/Accounts";
+import Login from "./pages/Login";
 import { RootLayout } from "./components/RootLayout";
 
 const queryClient = new QueryClient();
@@ -17,6 +18,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route element={<RootLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/accounts" element={<Accounts />} />
