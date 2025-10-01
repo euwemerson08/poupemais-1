@@ -7,8 +7,8 @@ import {
   CalendarPlus,
   ArrowRightLeft,
   List,
-  BarChart, // Importar BarChart para o ícone
-  Settings,
+  BarChart,
+  Settings, // Manter o import de Settings
   LogOut,
   PiggyBank,
   Receipt,
@@ -58,10 +58,10 @@ export const SidebarContent = () => {
         <NavLink href="#" icon={<List size={20} />}>
           Listas de Compras
         </NavLink>
-        <NavLink href="/financial-data" icon={<BarChart size={20} />} active={pathname === "/financial-data"}> {/* Novo link */}
+        <NavLink href="/financial-data" icon={<BarChart size={20} />} active={pathname === "/financial-data"}>
           Dados Financeiros
         </NavLink>
-        <NavLink href="#" icon={<Settings size={20} />}>
+        <NavLink href="/settings" icon={<Settings size={20} />} active={pathname === "/settings"}> {/* Link atualizado */}
           Configurações
         </NavLink>
       </nav>
