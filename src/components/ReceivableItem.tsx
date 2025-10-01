@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, parseISO } from "date-fns"; // Adicionado parseISO
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MoreVertical, Edit, Trash, CheckCircle } from "lucide-react";
 import {
@@ -24,6 +24,22 @@ interface ReceivableItemProps {
   receivable: Receivable;
   isRecurringTemplate?: boolean;
 }
+
+// Função para traduzir o intervalo de recorrência
+const translateRecurrenceInterval = (interval: string | undefined) => {
+  switch (interval) {
+    case 'daily':
+      return 'Diário';
+    case 'weekly':
+      return 'Semanal';
+    case 'monthly':
+      return 'Mensal';
+    case 'yearly':
+      return 'Anual';
+    default:
+      return interval; // Retorna o original se não houver tradução
+  }
+};
 
 export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: ReceivableItemProps) => {
   const queryClient = useQueryClient();
@@ -64,7 +80,7 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
           <p className="font-medium text-lg">{receivable.description}</p>
           <p className="text-sm text-muted-foreground">
             {isRecurringTemplate ? (
-              `Início: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })} - Intervalo: ${receivable.recurrence_interval}`
+              `Início: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })} - Intervalo: ${translateRecurrenceInterval(receivable.recurrence_interval)}`
             ) : (
               `Vencimento: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })}`
             )}
