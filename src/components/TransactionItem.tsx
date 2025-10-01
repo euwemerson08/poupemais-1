@@ -1,6 +1,6 @@
 import {
   UtensilsCrossed, Home, Car, Film, HeartPulse, ShoppingCart,
-  GraduationCap, Plane, Gift, Wrench, Landmark, MoreHorizontal, LucideIcon, MoreVertical
+  GraduationCap, Plane, Gift, Wrench, Landmark, MoreHorizontal, LucideIcon, MoreVertical, Briefcase
 } from "lucide-react";
 import { Transaction } from "@/types/transaction";
 import { format, parseISO } from "date-fns";
@@ -19,7 +19,7 @@ import { showError, showSuccess } from "@/utils/toast";
 const iconMap: { [key: string]: LucideIcon } = {
   UtensilsCrossed, Home, Car, Film, HeartPulse, ShoppingCart,
   GraduationCap, Plane, Gift, Wrench, Landmark, MoreHorizontal,
-  Briefcase: Briefcase,
+  Briefcase,
 };
 
 const formatCurrency = (value: number) => {
