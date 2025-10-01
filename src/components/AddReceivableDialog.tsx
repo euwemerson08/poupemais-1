@@ -81,19 +81,21 @@ export const AddReceivableDialog = () => {
             <Input id="description" {...register("description")} placeholder="Ex: Freelance de Design" className="bg-background" />
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> {/* Ajustado para 3 colunas */}
-            <div className="grid gap-2 md:col-span-1"> {/* Valor ocupa 1 coluna */}
-              <Label htmlFor="amount">Valor</Label>
-              <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />
-              {errors.amount && <p className="text-red-500 text-sm">{errors.amount.message}</p>}
-            </div>
-            <div className="grid gap-2 md:col-span-2"> {/* Categoria ocupa 2 colunas */}
-              <Label>Categoria</Label>
-              <Controller name="category_id" control={control} render={({ field }) => (
-                <CategoryPicker value={field.value} onChange={field.onChange} />
-              )} />
-              {errors.category_id && <p className="text-red-500 text-sm">{errors.category_id.message}</p>}
-            </div>
+          
+          {/* Campo Valor */}
+          <div className="grid gap-2">
+            <Label htmlFor="amount">Valor</Label>
+            <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />
+            {errors.amount && <p className="text-red-500 text-sm">{errors.amount.message}</p>}
+          </div>
+
+          {/* Seletor de Categoria */}
+          <div className="grid gap-2">
+            <Label>Categoria</Label>
+            <Controller name="category_id" control={control} render={({ field }) => (
+              <CategoryPicker value={field.value} onChange={field.onChange} />
+            )} />
+            {errors.category_id && <p className="text-red-500 text-sm">{errors.category_id.message}</p>}
           </div>
 
           <div className="grid gap-2">
