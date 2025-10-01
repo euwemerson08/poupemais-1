@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Receivable } from "@/types/receivable";
 import { format, parseISO, isPast } from "date-fns";
-import { MoreVertical, CheckCircle, LucideIcon, MoreHorizontal, Repeat } from "lucide-react"; // Import Repeat icon
+import { MoreVertical, CheckCircle, LucideIcon, MoreHorizontal, Repeat } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,6 +91,16 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
     );
   };
 
+  const getRecurrenceIntervalText = (interval?: string) => {
+    switch (interval) {
+      case 'daily': return 'Diário';
+      case 'weekly': return 'Semanal';
+      case 'monthly': return 'Mensal';
+      case 'yearly': return 'Anual';
+      default: return '';
+    }
+  };
+
   return (
     <>
       <div className="flex items-center justify-between p-4">
@@ -105,7 +115,7 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
                 <>
                   Início: {format(parseISO(receivable.due_date), "dd/MM/yyyy")}
                   {receivable.recurrence_end_date && ` · Fim: ${format(parseISO(receivable.recurrence_end_date), "dd/MM/yyyy")}`}
-                  {receivable.recurrence_interval && ` (${receivable.recurrence_interval})`}
+                  {receivable.recurrence_interval && ` (${getRecurrenceIntervalText(receivable.recurrence_interval)})`}
                 </>
               ) : (
                 `Vence em: ${format(parseISO(receivable.due_date), "dd/MM/yyyy")}`
@@ -149,7 +159,7 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
           onOpenChange={setIsReceivedDialogOpen}
         />
       )}
-      {isEditDialogOpen && !isRecurringTemplate && ( // Só abre se não for template recorrente
+      {isEditDialogOpen && !isRecurringTemplate && (
         <EditReceivableDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
