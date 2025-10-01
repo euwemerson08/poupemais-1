@@ -31,7 +31,7 @@ const editTransactionSchema = z.object({
 type EditTransactionFormData = z.infer<typeof editTransactionSchema>;
 
 const getAccounts = async (): Promise<Account[]> => {
-  const { data, error } = await supabase.from("accounts").select("*").neq('type', 'credit_card');
+  const { data, error } = await supabase.from("accounts").select("*");
   if (error) throw new Error(error.message);
   return data as Account[];
 };
@@ -46,7 +46,7 @@ const updateTransaction = async ({ id, formData }: { id: string, formData: EditT
   const { error } = await supabase.rpc('update_transaction', {
     p_transaction_id: id,
     p_description: formData.description,
-    p_amount: -amountToUpdate, // Expenses are negative
+    p_amount: amountToUpdate,
     p_date: format(formData.date, "yyyy-MM-dd"),
     p_account_id: formData.account_id,
     p_category_name: selectedCategory.name,
@@ -88,6 +88,7 @@ export const EditTransactionDialog = ({ open, onOpenChange, transaction }: EditT
       showSuccess("Transação atualizada com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       onOpenChange(false);
     },
     onError: (err) => {

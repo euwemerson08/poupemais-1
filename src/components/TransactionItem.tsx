@@ -44,7 +44,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
 
   const Icon = transaction.category_icon ? iconMap[transaction.category_icon] : MoreHorizontal;
   const isIncome = transaction.amount > 0;
-  const isCreditCardOrInstallment = transaction.accounts?.type === 'credit_card' || transaction.is_installment;
+  const isInstallment = transaction.is_installment;
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
@@ -64,8 +64,18 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
   };
 
   const editMenuItem = (
-    <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={isCreditCardOrInstallment}>
+    <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={isInstallment}>
       Editar
+    </DropdownMenuItem>
+  );
+
+  const deleteMenuItem = (
+     <DropdownMenuItem
+      onSelect={() => setIsDeleteDialogOpen(true)}
+      className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
+      disabled={isInstallment}
+    >
+      Excluir
     </DropdownMenuItem>
   );
 
@@ -94,22 +104,22 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
-              {isCreditCardOrInstallment ? (
+              {isInstallment ? (
                 <Tooltip>
                   <TooltipTrigger asChild>{editMenuItem}</TooltipTrigger>
-                  <TooltipContent>
-                    <p>Não é possível editar transações de cartão de crédito ou parceladas.</p>
-                  </TooltipContent>
+                  <TooltipContent><p>Não é possível editar uma única parcela.</p></TooltipContent>
                 </Tooltip>
               ) : (
                 editMenuItem
               )}
-              <DropdownMenuItem
-                onSelect={() => setIsDeleteDialogOpen(true)}
-                className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
-              >
-                Excluir
-              </DropdownMenuItem>
+              {isInstallment ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>{deleteMenuItem}</TooltipTrigger>
+                  <TooltipContent><p>Não é possível excluir uma única parcela.</p></TooltipContent>
+                </Tooltip>
+              ) : (
+                deleteMenuItem
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
