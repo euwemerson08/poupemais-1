@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UtensilsCrossed, Landmark, Car, LucideIcon, MoreHorizontal } from "lucide-react";
+import { UtensilsCrossed, Landmark, Car, LucideIcon, MoreHorizontal, Film, HeartPulse, ShoppingCart, GraduationCap, Plane, Gift, Wrench } from "lucide-react";
 import { Transaction } from "@/types/transaction";
 import { format, parseISO } from "date-fns";
 import { categories } from "./CategoryPicker";
