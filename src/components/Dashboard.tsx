@@ -16,7 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const Dashboard = () => {
-  const [iconSize, setIconSize] = useState("h-16 w-16");
+  const [iconSize, setIconSize] = useState("h-25 w-25");
 
   return (
     <div>
