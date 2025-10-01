@@ -1,7 +1,7 @@
 import { StatCard } from "./StatCard";
 import { OverviewChart } from "./OverviewChart";
 import { RecentTransactions } from "./RecentTransactions";
-import { ArrowUp, ArrowDown, Loader2 } from "lucide-react";
+import { ArrowUp, ArrowDown, Loader2, Wallet } from "lucide-react"; // Importar Wallet para o ícone
 import { useDashboardData } from "@/hooks/useDashboardData";
 
 const formatCurrency = (value: number) => {
@@ -52,6 +52,12 @@ export const Dashboard = () => {
           amount={formatCurrency(data?.monthlyExpenses ?? 0)}
           icon={<ArrowDown className="text-red-500" />}
           amountColor="text-red-500"
+        />
+        <StatCard
+          title="Total a Receber"
+          amount={formatCurrency(data?.totalReceivablesAmount ?? 0)}
+          icon={<Wallet className="text-blue-500" />}
+          amountColor="text-blue-500"
         />
       </section>
 

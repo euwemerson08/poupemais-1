@@ -41,6 +41,17 @@ const getDashboardData = async () => {
   }
   const totalFixedExpensesAmount = fixedExpenses.reduce((sum, fe) => sum + fe.amount, 0);
 
+  // Fetch Pending Receivables
+  const { data: pendingReceivables, error: receivablesError } = await supabase
+    .from("receivables")
+    .select("amount")
+    .eq("status", "pending");
+  if (receivablesError) {
+    showError("Erro ao buscar contas a receber.");
+    throw new Error(receivablesError.message);
+  }
+  const totalReceivablesAmount = pendingReceivables.reduce((sum, r) => sum + r.amount, 0);
+
 
   // 2. Receitas e Despesas do Mês
   const startOfCurrentMonth = format(startOfMonth(new Date()), "yyyy-MM-dd");
@@ -118,6 +129,7 @@ const getDashboardData = async () => {
     totalBalance,
     monthlyIncome,
     monthlyExpenses,
+    totalReceivablesAmount, // Adicionado o total a receber
     chartData,
     recentTransactions: recentTransactions as Transaction[],
   };
