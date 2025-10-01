@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Account } from "@/types/account";
@@ -64,7 +64,17 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
     queryFn: () => getInvoices(account.id),
   });
 
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | undefined>(invoices?.[0]?.id);
+  const invoicesWithTransactions = useMemo(() => {
+    return invoices?.filter(inv => inv.transactions && inv.transactions.length > 0) ?? [];
+  }, [invoices]);
+
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (invoicesWithTransactions.length > 0 && !selectedInvoiceId) {
+      setSelectedInvoiceId(invoicesWithTransactions[0].id);
+    }
+  }, [invoicesWithTransactions, selectedInvoiceId]);
 
   const payMutation = useMutation({
     mutationFn: payInvoice,
@@ -78,36 +88,36 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
   });
 
   const selectedInvoice = useMemo(() => {
-    const invoice = invoices?.find((inv) => inv.id === selectedInvoiceId);
+    const invoice = invoicesWithTransactions.find((inv) => inv.id === selectedInvoiceId);
     if (invoice) {
       const total = invoice.transactions.reduce((sum, tx) => sum + tx.amount, 0);
       return { ...invoice, total };
     }
     return undefined;
-  }, [invoices, selectedInvoiceId]);
+  }, [invoicesWithTransactions, selectedInvoiceId]);
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
-  if (!invoices || invoices.length === 0) {
+  if (invoicesWithTransactions.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-64 bg-card rounded-lg">
         <CreditCard className="h-12 w-12 text-gray-500 mb-4" />
         <h3 className="text-xl font-semibold">Nenhuma fatura encontrada</h3>
-        <p className="text-gray-400">Ainda não há faturas para este cartão.</p>
+        <p className="text-gray-400">Ainda não há faturas com transações para este cartão.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Select onValueChange={setSelectedInvoiceId} defaultValue={selectedInvoiceId}>
+      <Select onValueChange={setSelectedInvoiceId} value={selectedInvoiceId}>
         <SelectTrigger className="w-full sm:w-72">
           <SelectValue placeholder="Selecione uma fatura" />
         </SelectTrigger>
         <SelectContent>
-          {invoices.map((invoice) => (
+          {invoicesWithTransactions.map((invoice) => (
             <SelectItem key={invoice.id} value={invoice.id}>
               Fatura de {format(parseISO(invoice.closing_date), "MMMM 'de' yyyy", { locale: ptBR })}
             </SelectItem>
