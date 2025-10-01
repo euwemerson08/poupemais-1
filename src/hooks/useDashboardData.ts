@@ -56,7 +56,23 @@ const getDashboardData = async () => {
     showError("Erro ao buscar contas a receber do mês.");
     throw new Error(receivablesError.message);
   }
-  const totalReceivablesAmount = monthlyPendingReceivables.reduce((sum, r) => sum + r.amount, 0);
+  let totalReceivablesAmount = monthlyPendingReceivables.reduce((sum, r) => sum + r.amount, 0);
+
+  // Fetch Recurring Receivables active in the current month
+  const { data: recurringReceivables, error: recurringReceivablesError } = await supabase
+    .from("recurring_receivables")
+    .select("amount")
+    .lte("start_date", endOfCurrentMonth) // Starts before or in current month
+    .or(`end_date.is.null,end_date.gte.${startOfCurrentMonth}`) // Ends after or in current month, or never ends
+    .eq("recurrence_interval", "monthly"); // Only monthly recurring
+  
+  if (recurringReceivablesError) {
+    showError("Erro ao buscar recebimentos recorrentes.");
+    throw new Error(recurringReceivablesError.message);
+  }
+
+  const totalRecurringReceivablesAmount = recurringReceivables.reduce((sum, rr) => sum + rr.amount, 0);
+  totalReceivablesAmount += totalRecurringReceivablesAmount; // Add recurring to total
 
 
   const { data: monthlyTransactions, error: monthlyTransactionsError } = await supabase
@@ -131,7 +147,7 @@ const getDashboardData = async () => {
     totalBalance,
     monthlyIncome,
     monthlyExpenses,
-    totalReceivablesAmount, // Agora contém apenas os recebíveis do mês
+    totalReceivablesAmount, // Agora inclui recebíveis pendentes e recorrentes do mês
     chartData,
     recentTransactions: recentTransactions as Transaction[],
   };
