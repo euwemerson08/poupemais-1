@@ -87,11 +87,9 @@ export const TransactionItem = ({ transaction, onEdit }: TransactionItemProps) =
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
-              {!transaction.is_installment && (
-                <DropdownMenuItem onSelect={() => onEdit(transaction)}>
-                  Editar
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem onSelect={() => onEdit(transaction)} disabled={transaction.is_installment}>
+                Editar
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => setIsDeleteDialogOpen(true)}
                 className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
