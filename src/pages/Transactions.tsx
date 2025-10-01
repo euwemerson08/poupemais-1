@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 const getTransactions = async (): Promise<Transaction[]> => {
   const { data, error } = await supabase
     .from("transactions")
-    .select("*, accounts(name, type)")
+    .select("*, accounts(id, name, type)")
     .order("date", { ascending: false });
 
   if (error) throw new Error(error.message);
