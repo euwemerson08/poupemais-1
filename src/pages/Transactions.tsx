@@ -2,11 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Transaction } from "@/types/transaction";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
-import { AddIncomeDialog } from "@/components/AddIncomeDialog";
 import { TransactionItem } from "@/components/TransactionItem";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { EditTransactionDialog } from "@/components/EditTransactionDialog";
+import { Loader2, PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const getTransactions = async (): Promise<Transaction[]> => {
   const { data, error } = await supabase
@@ -23,13 +21,6 @@ const Transactions = () => {
     queryKey: ["transactions"],
     queryFn: getTransactions,
   });
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-
-  const handleEdit = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsEditDialogOpen(true);
-  };
 
   return (
     <div>
@@ -42,7 +33,9 @@ const Transactions = () => {
         </div>
         <div className="flex gap-2">
           <AddExpenseDialog />
-          <AddIncomeDialog />
+          <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white">
+            <PlusCircle className="mr-2 h-4 w-4" /> Receita
+          </Button>
         </div>
       </header>
 
@@ -54,16 +47,11 @@ const Transactions = () => {
         <div className="bg-card rounded-lg">
           <div className="divide-y divide-border px-6">
             {transactions?.map((tx) => (
-              <TransactionItem key={tx.id} transaction={tx} onEdit={handleEdit} />
+              <TransactionItem key={tx.id} transaction={tx} />
             ))}
           </div>
         </div>
       )}
-      <EditTransactionDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        transaction={selectedTransaction}
-      />
     </div>
   );
 };

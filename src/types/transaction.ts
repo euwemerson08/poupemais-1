@@ -2,7 +2,6 @@ import { Account } from './account';
 
 export interface Transaction {
   id: string;
-  account_id: string;
   description: string;
   amount: number;
   date: string;
