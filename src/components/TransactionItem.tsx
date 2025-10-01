@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { DeleteTransactionDialog } from "./DeleteTransactionDialog";
 import { EditTransactionDialog } from "./EditTransactionDialog";
+import { cn } from "@/lib/utils";
 
 const categoryIconMap: { [key: string]: LucideIcon } = {
   'Alimentação': UtensilsCrossed,
@@ -30,6 +31,21 @@ const categoryIconMap: { [key: string]: LucideIcon } = {
   'Serviços': Wrench,
   'Pagamentos': Landmark,
   'Outros': MoreHorizontal,
+};
+
+const categoryStyles: { [key: string]: { bg: string; text: string } } = {
+  'Alimentação': { bg: 'bg-orange-500/20', text: 'text-orange-400' },
+  'Moradia': { bg: 'bg-blue-500/20', text: 'text-blue-400' },
+  'Transporte': { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
+  'Lazer': { bg: 'bg-pink-500/20', text: 'text-pink-400' },
+  'Saúde': { bg: 'bg-red-500/20', text: 'text-red-400' },
+  'Compras': { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+  'Educação': { bg: 'bg-teal-500/20', text: 'text-teal-400' },
+  'Viagens': { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+  'Presentes': { bg: 'bg-green-500/20', text: 'text-green-400' },
+  'Serviços': { bg: 'bg-indigo-500/20', text: 'text-indigo-400' },
+  'Pagamentos': { bg: 'bg-lime-500/20', text: 'text-lime-400' },
+  'Outros': { bg: 'bg-gray-500/20', text: 'text-gray-400' },
 };
 
 const formatCurrency = (value: number) => {
@@ -48,6 +64,7 @@ interface TransactionItemProps {
 
 export const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const Icon = transaction.category_name ? categoryIconMap[transaction.category_name] : MoreHorizontal;
+  const styles = transaction.category_name ? categoryStyles[transaction.category_name] || categoryStyles['Outros'] : categoryStyles['Outros'];
   const isIncome = transaction.amount > 0;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -75,8 +92,8 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
     <>
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center">
-            {Icon ? <Icon className="h-5 w-5 text-gray-400" /> : <MoreHorizontal className="h-5 w-5 text-gray-400" />}
+          <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", styles.bg)}>
+            {Icon ? <Icon className={cn("h-5 w-5", styles.text)} /> : <MoreHorizontal className={cn("h-5 w-5", styles.text)} />}
           </div>
           <div>
             <p className="font-medium">{transaction.description}</p>
