@@ -70,7 +70,11 @@ export const AddAccountDialog = () => {
   });
 
   const onSubmit = (data: AccountFormData) => {
-    mutation.mutate(data);
+    const submissionData = { ...data };
+    if (submissionData.type === 'credit_card') {
+      submissionData.balance = 0;
+    }
+    mutation.mutate(submissionData);
   };
 
   return (
@@ -107,11 +111,13 @@ export const AddAccountDialog = () => {
               )}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="balance">{balanceLabel}</Label>
-            <Input id="balance" {...register("balance")} placeholder="R$ 0,00" className="bg-background" />
-            {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
-          </div>
+          {accountType !== 'credit_card' && (
+            <div className="grid gap-2">
+              <Label htmlFor="balance">{balanceLabel}</Label>
+              <Input id="balance" {...register("balance")} placeholder="R$ 0,00" className="bg-background" />
+              {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
+            </div>
+          )}
           {accountType === 'credit_card' && (
             <>
               <div className="grid gap-2">

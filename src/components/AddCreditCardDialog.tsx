@@ -61,7 +61,8 @@ export const AddCreditCardDialog = () => {
   });
 
   const onSubmit = (data: AccountFormData) => {
-    mutation.mutate(data);
+    const submissionData = { ...data, balance: 0 };
+    mutation.mutate(submissionData);
   };
 
   return (
@@ -80,11 +81,6 @@ export const AddCreditCardDialog = () => {
             <Label htmlFor="name">Nome do Cartão</Label>
             <Input id="name" {...register("name")} placeholder="Ex: Cartão Nubank" className="bg-background" />
             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="balance">Fatura Atual</Label>
-            <Input id="balance" {...register("balance")} placeholder="R$ 0,00" className="bg-background" />
-            {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="limit">Limite do Cartão</Label>
