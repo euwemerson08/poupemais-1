@@ -1,19 +1,37 @@
 import { StatCard } from "./StatCard";
 import { OverviewChart } from "./OverviewChart";
 import { RecentTransactions } from "./RecentTransactions";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SidebarNav } from "./SidebarNav";
 
 export const Dashboard = () => {
   return (
     <div>
-      <header>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-400 mt-1">
-          Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
-        </p>
+      <header className="flex items-center justify-between pb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-400 mt-1">
+            Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
+          </p>
+        </div>
+        <div className="lg:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col p-4 bg-card border-r-0">
+              <SidebarNav />
+            </SheetContent>
+          </Sheet>
+        </div>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="Saldo Total"
           amount="R$ 3.650,75"
