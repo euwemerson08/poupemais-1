@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Wallet, Landmark, CreditCard } from "lucide-react";
+import { Wallet, Landmark, CreditCard } from "lucide-react";
 import { AccountCard } from "@/components/AccountCard";
+import { AddAccountDialog } from "@/components/AddAccountDialog";
 
 const Accounts = () => {
   return (
@@ -12,9 +12,7 @@ const Accounts = () => {
             Gerencie suas contas, carteiras e cartões de crédito.
           </p>
         </div>
-        <Button className="bg-[#E63980] hover:bg-[#d63374] text-white font-semibold">
-          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Conta
-        </Button>
+        <AddAccountDialog />
       </header>
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
