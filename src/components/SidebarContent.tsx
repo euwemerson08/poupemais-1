@@ -12,6 +12,7 @@ import {
   LogOut,
   PiggyBank,
   Receipt,
+  Repeat, // Importar o ícone Repeat
 } from "lucide-react";
 import { NavLink } from "./NavLink";
 import { useLocation } from "react-router-dom";
@@ -54,6 +55,9 @@ export const SidebarContent = () => {
         </NavLink>
         <NavLink href="/receivables" icon={<CalendarPlus size={20} />} active={pathname === "/receivables"}>
           Contas a Receber
+        </NavLink>
+        <NavLink href="/recurring-receivables" icon={<Repeat size={20} />} active={pathname === "/recurring-receivables"}>
+          Recebimentos Recorrentes
         </NavLink>
         <NavLink href="#" icon={<List size={20} />}>
           Listas de Compras

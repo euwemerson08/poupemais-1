@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Receivable } from "@/types/receivable";
-import { format, parseISO, isPast } from "date-fns";
-import { MoreVertical, CheckCircle, LucideIcon, MoreHorizontal } from "lucide-react";
+import { RecurringReceivable } from "@/types/receivable";
+import { format, parseISO } from "date-fns";
+import { MoreVertical, LucideIcon, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { showError, showSuccess } from "@/utils/toast";
-import { MarkAsReceivedDialog } from "./MarkAsReceivedDialog";
-import { DeleteReceivableDialog } from "./DeleteReceivableDialog";
-import { EditReceivableDialog } from "./EditReceivableDialog";
+import { DeleteRecurringReceivableDialog } from "./DeleteRecurringReceivableDialog";
+import { EditRecurringReceivableDialog } from "./EditRecurringReceivableDialog";
 import { categories } from "./CategoryPicker";
 import { cn } from "@/lib/utils";
 
@@ -18,20 +15,18 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 };
 
-const deleteReceivable = async (id: string) => {
-  const { error } = await supabase.rpc('delete_receivable', { p_receivable_id: id });
+const deleteRecurringReceivable = async (id: string) => {
+  const { error } = await supabase.from("recurring_receivables").delete().eq("id", id);
   if (error) throw new Error(error.message);
 };
 
-interface ReceivableItemProps {
-  receivable: Receivable;
+interface RecurringReceivableItemProps {
+  receivable: RecurringReceivable;
 }
 
-export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
-  const [isReceivedDialogOpen, setIsReceivedDialogOpen] = useState(false);
+export const RecurringReceivableItem = ({ receivable }: RecurringReceivableItemProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const isOverdue = isPast(parseISO(receivable.due_date)) && receivable.status === 'pending';
   const queryClient = useQueryClient();
 
   const category = categories.find(c => c.name === receivable.category_name);
@@ -39,13 +34,13 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
   const categoryColor = category?.color || '#6B7280'; // Default gray
 
   const deleteMutation = useMutation({
-    mutationFn: deleteReceivable,
+    mutationFn: deleteRecurringReceivable,
     onSuccess: () => {
-      showSuccess("Conta a receber excluída com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["receivables"] });
+      showSuccess("Recebimento recorrente excluído com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["recurring_receivables"] });
     },
     onError: (err) => {
-      showError(`Erro ao excluir conta a receber: ${err.message}`);
+      showError(`Erro ao excluir recebimento recorrente: ${err.message}`);
     },
   });
 
@@ -63,22 +58,13 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
           </div>
           <div>
             <p className="font-medium">{receivable.description}</p>
-            <p className={`text-sm ${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
-              Vence em: {format(parseISO(receivable.due_date), "dd/MM/yyyy")}
+            <p className="text-sm text-gray-400">
+              Vence todo dia {receivable.due_day} · Início: {format(parseISO(receivable.start_date), "dd/MM/yyyy")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <p className="font-semibold text-lg">{formatCurrency(receivable.amount)}</p>
-          <Badge variant={receivable.status === 'received' ? 'default' : 'outline'} className={receivable.status === 'received' ? 'bg-green-600/20 text-green-400 border-green-600/30' : isOverdue ? 'border-red-500/30 text-red-400' : ''}>
-            {receivable.status === 'received' ? 'Recebido' : isOverdue ? 'Vencido' : 'Pendente'}
-          </Badge>
-          {receivable.status === 'pending' && (
-            <Button size="sm" onClick={() => setIsReceivedDialogOpen(true)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Receber
-            </Button>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="text-gray-400 hover:text-white p-1 rounded-full">
@@ -99,21 +85,14 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
           </DropdownMenu>
         </div>
       </div>
-      {isReceivedDialogOpen && (
-        <MarkAsReceivedDialog
-          receivable={receivable}
-          open={isReceivedDialogOpen}
-          onOpenChange={setIsReceivedDialogOpen}
-        />
-      )}
       {isEditDialogOpen && (
-        <EditReceivableDialog
+        <EditRecurringReceivableDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           receivable={receivable}
         />
       )}
-      <DeleteReceivableDialog
+      <DeleteRecurringReceivableDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
