@@ -13,7 +13,8 @@ import FixedExpenses from "./pages/FixedExpenses";
 import FinancialPlan from "./pages/FinancialPlan";
 import Receivables from "./pages/Receivables";
 import FinancialData from "./pages/FinancialData";
-import Settings from "./pages/Settings"; // Importar a nova página de configurações
+import Settings from "./pages/Settings";
+import ShoppingLists from "./pages/ShoppingLists"; // Importar a nova página de listas de compras
 import Login from "./pages/Login";
 import { RootLayout } from "./components/RootLayout";
 
@@ -37,7 +38,8 @@ const App = () => (
             <Route path="/financial-plan" element={<FinancialPlan />} />
             <Route path="/receivables" element={<Receivables />} />
             <Route path="/financial-data" element={<FinancialData />} />
-            <Route path="/settings" element={<Settings />} /> {/* Nova rota para configurações */}
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/shopping-lists" element={<ShoppingLists />} /> {/* Nova rota para listas de compras */}
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
