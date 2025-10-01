@@ -7,7 +7,7 @@ import {
   CalendarPlus,
   ArrowRightLeft,
   List,
-  BarChart,
+  BarChart, // Importar BarChart para o ícone
   Settings,
   LogOut,
   PiggyBank,
@@ -58,7 +58,7 @@ export const SidebarContent = () => {
         <NavLink href="#" icon={<List size={20} />}>
           Listas de Compras
         </NavLink>
-        <NavLink href="#" icon={<BarChart size={20} />}>
+        <NavLink href="/financial-data" icon={<BarChart size={20} />} active={pathname === "/financial-data"}> {/* Novo link */}
           Dados Financeiros
         </NavLink>
         <NavLink href="#" icon={<Settings size={20} />}>

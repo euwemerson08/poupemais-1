@@ -12,6 +12,7 @@ import Transactions from "./pages/Transactions";
 import FixedExpenses from "./pages/FixedExpenses";
 import FinancialPlan from "./pages/FinancialPlan";
 import Receivables from "./pages/Receivables";
+import FinancialData from "./pages/FinancialData"; // Importar a nova página
 import Login from "./pages/Login";
 import { RootLayout } from "./components/RootLayout";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/fixed-expenses" element={<FixedExpenses />} />
             <Route path="/financial-plan" element={<FinancialPlan />} />
             <Route path="/receivables" element={<Receivables />} />
+            <Route path="/financial-data" element={<FinancialData />} /> {/* Nova rota */}
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
