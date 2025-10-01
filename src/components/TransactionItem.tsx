@@ -17,9 +17,19 @@ import { showError, showSuccess } from "@/utils/toast";
 import { DeleteTransactionDialog } from "./DeleteTransactionDialog";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 
-const iconMap: { [key: string]: LucideIcon } = {
-  UtensilsCrossed, Home, Car, Film, HeartPulse, ShoppingCart,
-  GraduationCap, Plane, Gift, Wrench, Landmark, MoreHorizontal
+const categoryIconMap: { [key: string]: LucideIcon } = {
+  'Alimentação': UtensilsCrossed,
+  'Moradia': Home,
+  'Transporte': Car,
+  'Lazer': Film,
+  'Saúde': HeartPulse,
+  'Compras': ShoppingCart,
+  'Educação': GraduationCap,
+  'Viagens': Plane,
+  'Presentes': Gift,
+  'Serviços': Wrench,
+  'Pagamentos': Landmark,
+  'Outros': MoreHorizontal,
 };
 
 const formatCurrency = (value: number) => {
@@ -37,7 +47,7 @@ interface TransactionItemProps {
 }
 
 export const TransactionItem = ({ transaction }: TransactionItemProps) => {
-  const Icon = transaction.category_icon ? iconMap[transaction.category_icon] : MoreHorizontal;
+  const Icon = transaction.category_name ? categoryIconMap[transaction.category_name] : MoreHorizontal;
   const isIncome = transaction.amount > 0;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -66,7 +76,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-4">
           <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center">
-            <Icon className="h-5 w-5 text-gray-400" />
+            {Icon ? <Icon className="h-5 w-5 text-gray-400" /> : <MoreHorizontal className="h-5 w-5 text-gray-400" />}
           </div>
           <div>
             <p className="font-medium">{transaction.description}</p>
