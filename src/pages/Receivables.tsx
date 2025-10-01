@@ -82,7 +82,7 @@ const Receivables = () => {
         <div className="bg-card rounded-lg">
           <div className="divide-y divide-border">
             {receivables.map((item) => (
-              <ReceivableItem key={item.id} receivable={item} />
+              <ReceivableItem key={item.id} receivable={item} isRecurringTemplate={item.is_recurring_template} />
             ))}
           </div>
         </div>
