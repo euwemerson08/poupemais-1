@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Accounts from "./pages/Accounts";
+import CreditCards from "./pages/CreditCards";
 import Login from "./pages/Login";
 import { RootLayout } from "./components/RootLayout";
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route element={<RootLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/accounts" element={<Accounts />} />
+            <Route path="/credit-cards" element={<CreditCards />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

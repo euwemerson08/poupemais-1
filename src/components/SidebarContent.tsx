@@ -37,11 +37,11 @@ export const SidebarContent = () => {
         <NavLink href="/accounts" icon={<Wallet size={20} />} active={pathname === "/accounts"}>
           Contas
         </NavLink>
+        <NavLink href="/credit-cards" icon={<CreditCard size={20} />} active={pathname === "/credit-cards"}>
+          Cartões de Crédito
+        </NavLink>
         <NavLink href="#" icon={<ShoppingCart size={20} />}>
           Compras
-        </NavLink>
-        <NavLink href="#" icon={<CreditCard size={20} />}>
-          Compras Parceladas
         </NavLink>
         <NavLink href="#" icon={<Landmark size={20} />}>
           Despesas Fixas
@@ -76,4 +76,3 @@ export const SidebarContent = () => {
       </div>
     </div>
   );
-};
