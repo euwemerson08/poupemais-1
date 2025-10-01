@@ -16,6 +16,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { showError, showSuccess } from "@/utils/toast";
 import { useAccounts } from "@/hooks/useAccounts";
+import { cn } from "@/lib/utils"; // Importação adicionada
 
 const formSchema = z.object({
   account_id: z.string().min(1, "Conta é obrigatória."),
