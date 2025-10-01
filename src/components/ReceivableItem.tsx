@@ -48,17 +48,17 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
   const deleteMutation = useMutation({
     mutationFn: ({ id, isRecurring }: { id: string; isRecurring: boolean }) => deleteReceivable(id, isRecurring),
     onSuccess: () => {
-      showSuccess("Item excluído com sucesso!"); // Mensagem mais genérica
+      showSuccess("Item excluído com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["receivables"] });
       queryClient.invalidateQueries({ queryKey: ["recurring_receivables"] });
     },
     onError: (err) => {
-      showError(`Erro ao excluir item: ${err.message}`); // Mensagem mais genérica
+      showError(`Erro ao excluir item: ${err.message}`);
     },
   });
 
   const handleConfirmDelete = () => {
-    deleteMutation.mutate({ id: receivable.id, isRecurring: !!isRecurringTemplate }); // Passar isRecurringTemplate
+    deleteMutation.mutate({ id: receivable.id, isRecurring: !!isRecurringTemplate });
     setIsDeleteDialogOpen(false);
   };
 
@@ -126,12 +126,6 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
         <div className="flex items-center gap-4">
           <p className="font-semibold text-lg">{formatCurrency(receivable.amount)}</p>
           {getStatusBadge()}
-          {!isRecurringTemplate && receivable.status === 'pending' && (
-            <Button size="sm" onClick={() => setIsReceivedDialogOpen(true)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Receber
-            </Button>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="text-gray-400 hover:text-white p-1 rounded-full">
@@ -139,6 +133,11 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
+              {(receivable.status === 'pending' || isRecurringTemplate) && (
+                <DropdownMenuItem onSelect={() => setIsReceivedDialogOpen(true)}>
+                  <CheckCircle className="mr-2 h-4 w-4" /> Receber
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={isRecurringTemplate}>
                 Editar
               </DropdownMenuItem>
