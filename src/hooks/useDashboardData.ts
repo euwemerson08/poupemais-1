@@ -25,20 +25,21 @@ const getDashboardData = async () => {
     throw new Error(accountsError.message);
   }
   const totalBalance = accounts.reduce((sum, acc) => {
-    // Para cartões de crédito, o balance é a fatura, que é uma despesa.
-    // Para o saldo total, consideramos o limite disponível menos a fatura.
-    // Ou, se for uma conta normal, apenas o saldo.
     if (acc.type === 'credit_card') {
-      // Se o balance for negativo (fatura), ele já está subtraído do limite.
-      // Se o balance for positivo (crédito), ele adiciona ao limite.
-      // Para o saldo total, vamos considerar o balance como uma dívida (negativo)
-      // ou um crédito (positivo) que afeta o saldo geral.
-      // Simplificando para o dashboard, vamos considerar o 'balance' do cartão como uma dívida a ser paga.
-      // Então, ele subtrai do saldo geral.
       return sum + acc.balance;
     }
     return sum + acc.balance;
   }, 0);
+
+  // Fetch Fixed Expenses once
+  const { data: fixedExpenses, error: fixedExpensesError } = await supabase
+    .from("fixed_expenses")
+    .select("amount");
+  if (fixedExpensesError) {
+    showError("Erro ao buscar despesas fixas.");
+    throw new Error(fixedExpensesError.message);
+  }
+  const totalFixedExpensesAmount = fixedExpenses.reduce((sum, fe) => sum + fe.amount, 0);
 
 
   // 2. Receitas e Despesas do Mês
@@ -56,7 +57,7 @@ const getDashboardData = async () => {
   }
 
   let monthlyIncome = 0;
-  let monthlyExpenses = 0;
+  let monthlyExpenses = totalFixedExpensesAmount; // Start with fixed expenses
   monthlyTransactions.forEach(tx => {
     if (tx.amount > 0) {
       monthlyIncome += tx.amount;
@@ -86,7 +87,7 @@ const getDashboardData = async () => {
     }
 
     let periodIncome = 0;
-    let periodExpenses = 0;
+    let periodExpenses = totalFixedExpensesAmount; // Add fixed expenses to each month's expenses
     periodTransactions.forEach(tx => {
       if (tx.amount > 0) {
         periodIncome += tx.amount;
