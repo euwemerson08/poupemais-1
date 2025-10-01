@@ -1,29 +1,24 @@
 import {
-  LayoutDashboard,
+  LayoutGrid,
   Wallet,
   ShoppingCart,
-  CreditCard,
-  Landmark,
-  Target,
-  CalendarPlus,
+  CalendarDays,
+  ReceiptText,
+  PiggyBank,
+  HandCoins,
   ArrowRightLeft,
   List,
   BarChart,
   Settings,
   LogOut,
-  PiggyBank,
 } from "lucide-react";
 import { NavLink } from "./NavLink";
 
 export const Sidebar = () => {
   return (
-    <aside className="w-64 bg-card p-6 flex-col hidden lg:flex">
-      <div className="flex items-center gap-2 mb-10">
-        <PiggyBank className="h-8 w-8 text-primary" />
-        <h1 className="text-2xl font-bold">Financely</h1>
-      </div>
-      <nav className="flex flex-col gap-2 flex-1">
-        <NavLink href="#" icon={<LayoutDashboard size={20} />} active>
+    <aside className="w-64 bg-card p-4 flex-col hidden lg:flex">
+      <nav className="flex flex-col gap-2 flex-1 mt-4">
+        <NavLink href="#" icon={<LayoutGrid size={20} />} active>
           Dashboard
         </NavLink>
         <NavLink href="#" icon={<Wallet size={20} />}>
@@ -32,16 +27,16 @@ export const Sidebar = () => {
         <NavLink href="#" icon={<ShoppingCart size={20} />}>
           Compras
         </NavLink>
-        <NavLink href="#" icon={<CreditCard size={20} />}>
+        <NavLink href="#" icon={<CalendarDays size={20} />}>
           Compras Parceladas
         </NavLink>
-        <NavLink href="#" icon={<Landmark size={20} />}>
+        <NavLink href="#" icon={<ReceiptText size={20} />}>
           Despesas Fixas
         </NavLink>
-        <NavLink href="#" icon={<Target size={20} />}>
+        <NavLink href="#" icon={<PiggyBank size={20} />}>
           Plano Financeiro
         </NavLink>
-        <NavLink href="#" icon={<CalendarPlus size={20} />}>
+        <NavLink href="#" icon={<HandCoins size={20} />}>
           Contas a Receber
         </NavLink>
         <NavLink href="#" icon={<ArrowRightLeft size={20} />}>

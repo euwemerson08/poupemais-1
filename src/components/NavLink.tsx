@@ -16,7 +16,7 @@ export const NavLink = ({ href, icon, children, active = false }: NavLinkProps) 
         "flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors",
         active
           ? "bg-primary/10 text-primary"
-          : "text-gray-400 hover:bg-white/5 hover:text-white"
+          : "text-gray-300 hover:bg-white/5 hover:text-white"
       )}
     >
       {icon}
