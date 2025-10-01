@@ -5,6 +5,8 @@ import { AddExpenseDialog } from "@/components/AddExpenseDialog";
 import { AddIncomeDialog } from "@/components/AddIncomeDialog";
 import { TransactionItem } from "@/components/TransactionItem";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { EditTransactionDialog } from "@/components/EditTransactionDialog";
 
 const getTransactions = async (): Promise<Transaction[]> => {
   const { data, error } = await supabase
@@ -21,6 +23,13 @@ const Transactions = () => {
     queryKey: ["transactions"],
     queryFn: getTransactions,
   });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  const handleEdit = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsEditDialogOpen(true);
+  };
 
   return (
     <div>
@@ -45,11 +54,16 @@ const Transactions = () => {
         <div className="bg-card rounded-lg">
           <div className="divide-y divide-border px-6">
             {transactions?.map((tx) => (
-              <TransactionItem key={tx.id} transaction={tx} />
+              <TransactionItem key={tx.id} transaction={tx} onEdit={handleEdit} />
             ))}
           </div>
         </div>
       )}
+      <EditTransactionDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        transaction={selectedTransaction}
+      />
     </div>
   );
 };
