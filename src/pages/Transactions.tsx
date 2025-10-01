@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Transaction } from "@/types/transaction";
 import { AddExpenseDialog } from "@/components/AddExpenseDialog";
+import { AddIncomeDialog } from "@/components/AddIncomeDialog";
 import { TransactionItem } from "@/components/TransactionItem";
-import { Loader2, PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const getTransactions = async (): Promise<Transaction[]> => {
   const { data, error } = await supabase
     .from("transactions")
-    .select("*, accounts(name, type)")
+    .select("*, accounts(id, name, type)")
     .order("date", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -33,9 +33,7 @@ const Transactions = () => {
         </div>
         <div className="flex gap-2">
           <AddExpenseDialog />
-          <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white">
-            <PlusCircle className="mr-2 h-4 w-4" /> Receita
-          </Button>
+          <AddIncomeDialog />
         </div>
       </header>
 

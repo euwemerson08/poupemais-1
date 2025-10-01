@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { DeleteTransactionDialog } from "./DeleteTransactionDialog";
+import { EditTransactionDialog } from "./EditTransactionDialog";
 
 const iconMap: { [key: string]: LucideIcon } = {
   UtensilsCrossed, Home, Car, Film, HeartPulse, ShoppingCart,
@@ -39,6 +40,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const Icon = transaction.category_icon ? iconMap[transaction.category_icon] : MoreHorizontal;
   const isIncome = transaction.amount > 0;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -84,6 +86,9 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
+              <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
+                Editar
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => setIsDeleteDialogOpen(true)}
                 className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
@@ -99,6 +104,13 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
       />
+      {isEditDialogOpen && (
+        <EditTransactionDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          transaction={transaction}
+        />
+      )}
     </>
   );
 };
