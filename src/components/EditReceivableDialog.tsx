@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
-import { Receivable, ReceivableFormData, receivableSchema } from "@/types/receivable";
+import { Receivable, receivableSchema, ReceivableFormInput } from "@/types/receivable"; // Importando ReceivableFormInput
 import { CategoryPicker, categories } from "./CategoryPicker";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-const updateReceivable = async ({ id, ...formData }: ReceivableFormData & { id: string }) => {
+const updateReceivable = async ({ id, ...formData }: ReceivableFormInput & { id: string }) => { // Usar ReceivableFormInput aqui
   const selectedCategory = categories.find(c => c.id === formData.category_id);
   if (!selectedCategory) throw new Error("Categoria inválida");
 
@@ -42,7 +42,7 @@ interface EditReceivableDialogProps {
 export const EditReceivableDialog = ({ open, onOpenChange, receivable }: EditReceivableDialogProps) => {
   const queryClient = useQueryClient();
 
-  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<ReceivableFormData>({
+  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<ReceivableFormInput>({ // Usar ReceivableFormInput
     resolver: zodResolver(receivableSchema),
   });
 
@@ -51,7 +51,7 @@ export const EditReceivableDialog = ({ open, onOpenChange, receivable }: EditRec
       const category = categories.find(c => c.name === receivable.category_name);
       reset({
         description: receivable.description,
-        amount: String(receivable.amount.toFixed(2)).replace('.', ','),
+        amount: String(receivable.amount.toFixed(2)).replace('.', ','), // Agora é válido para ReceivableFormInput
         due_date: parseISO(receivable.due_date),
         category_id: category?.id,
         is_recurring: false, // Always false for single receivables
@@ -71,7 +71,7 @@ export const EditReceivableDialog = ({ open, onOpenChange, receivable }: EditRec
     },
   });
 
-  const onSubmit = (data: ReceivableFormData) => {
+  const onSubmit = (data: ReceivableFormInput) => { // Usar ReceivableFormInput aqui
     mutation.mutate({ ...data, id: receivable.id });
   };
 

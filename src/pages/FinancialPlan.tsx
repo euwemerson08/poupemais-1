@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FinancialPlan } from "@/types/financialPlan";
+import type { FinancialPlan } from "@/types/financialPlan"; // Corrigido: importação type-only
 import { AddFinancialPlanDialog } from "@/components/AddFinancialPlanDialog";
 import { FinancialPlanCard } from "@/components/FinancialPlanCard";
 import { Loader2, Target } from "lucide-react";

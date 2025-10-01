@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
-import { ReceivableFormData, receivableSchema, recurrenceIntervals } from "@/types/receivable";
+import { receivableSchema, recurrenceIntervals, ReceivableFormInput } from "@/types/receivable"; // Importando ReceivableFormInput
 import { CategoryPicker, categories } from "./CategoryPicker";
 
 import {
@@ -20,7 +20,7 @@ import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const createReceivable = async (formData: ReceivableFormData) => {
+const createReceivable = async (formData: ReceivableFormInput) => { // Usar ReceivableFormInput aqui
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Usuário não autenticado");
 
@@ -60,9 +60,9 @@ const createReceivable = async (formData: ReceivableFormData) => {
 export const AddReceivableDialog = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { control, register, handleSubmit, reset, watch, formState: { errors } } = useForm<ReceivableFormData>({
+  const { control, register, handleSubmit, reset, watch, formState: { errors } } = useForm<ReceivableFormInput>({ // Usar ReceivableFormInput
     resolver: zodResolver(receivableSchema),
-    defaultValues: { due_date: new Date(), is_recurring: false },
+    defaultValues: { due_date: new Date(), is_recurring: false, amount: "" }, // amount: "" é válido para string
   });
 
   const isRecurring = watch("is_recurring");
@@ -74,14 +74,14 @@ export const AddReceivableDialog = () => {
       queryClient.invalidateQueries({ queryKey: ["receivables"] });
       queryClient.invalidateQueries({ queryKey: ["recurring_receivables"] }); // Invalidate recurring query too
       setOpen(false);
-      reset({ due_date: new Date(), description: "", amount: "", category_id: "", is_recurring: false, recurrence_interval: undefined, recurrence_end_date: undefined });
+      reset({ due_date: new Date(), description: "", amount: "", category_id: "", is_recurring: false, recurrence_interval: undefined, recurrence_end_date: undefined }); // amount: "" é válido
     },
     onError: (err) => {
       showError(`Erro ao adicionar conta a receber: ${err.message}`);
     },
   });
 
-  const onSubmit = (data: ReceivableFormData) => {
+  const onSubmit = (data: ReceivableFormInput) => { // Usar ReceivableFormInput aqui
     mutation.mutate(data);
   };
 

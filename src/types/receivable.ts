@@ -31,6 +31,17 @@ export const receivableSchema = z.object({
 
 export type ReceivableFormData = z.infer<typeof receivableSchema>;
 
+// This type represents the raw input values from the form
+export type ReceivableFormInput = {
+  description: string;
+  amount: string; // Raw string input for the form
+  due_date: Date;
+  category_id: string;
+  is_recurring?: boolean;
+  recurrence_interval?: typeof recurrenceIntervals[number];
+  recurrence_end_date?: Date | null;
+}
+
 export interface Receivable {
   id: string;
   description: string;
