@@ -52,7 +52,7 @@ export const SidebarContent = () => {
         <NavLink href="/financial-plan" icon={<Target size={20} />} active={pathname === "/financial-plan"}>
           Plano Financeiro
         </NavLink>
-        <NavLink href="#" icon={<CalendarPlus size={20} />}>
+        <NavLink href="/receivables" icon={<CalendarPlus size={20} />} active={pathname === "/receivables"}>
           Contas a Receber
         </NavLink>
         <NavLink href="#" icon={<List size={20} />}>
