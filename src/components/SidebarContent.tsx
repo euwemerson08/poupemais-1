@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   PiggyBank,
+  Receipt,
 } from "lucide-react";
 import { NavLink } from "./NavLink";
 import { useLocation } from "react-router-dom";
@@ -39,6 +40,9 @@ export const SidebarContent = () => {
         </NavLink>
         <NavLink href="/credit-cards" icon={<CreditCard size={20} />} active={pathname === "/credit-cards"}>
           Cartões de Crédito
+        </NavLink>
+        <NavLink href="/invoices" icon={<Receipt size={20} />} active={pathname === "/invoices"}>
+          Faturas
         </NavLink>
         <NavLink href="#" icon={<ShoppingCart size={20} />}>
           Compras

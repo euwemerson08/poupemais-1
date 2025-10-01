@@ -14,6 +14,14 @@ export const accountSchema = z.object({
     (val) => (val === '' || val === undefined || val === null ? undefined : (typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val)),
     z.number({ invalid_type_error: "Limite deve ser um número" }).optional().nullable()
   ),
+  closing_day: z.preprocess(
+    (val) => (val === '' || val === undefined || val === null ? undefined : parseInt(String(val), 10)),
+    z.number({ invalid_type_error: "Deve ser um número" }).int().min(1, "Deve ser entre 1 e 31").max(31, "Deve ser entre 1 e 31").optional().nullable()
+  ),
+  due_day: z.preprocess(
+    (val) => (val === '' || val === undefined || val === null ? undefined : parseInt(String(val), 10)),
+    z.number({ invalid_type_error: "Deve ser um número" }).int().min(1, "Deve ser entre 1 e 31").max(31, "Deve ser entre 1 e 31").optional().nullable()
+  ),
 });
 
 export type Account = z.infer<typeof accountSchema> & { id: string };

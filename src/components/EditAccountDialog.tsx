@@ -57,6 +57,7 @@ export const EditAccountDialog = ({ open, onOpenChange, account }: EditAccountDi
   }, [account, reset]);
 
   const selectedColor = watch("color");
+  const accountType = watch("type");
 
   const mutation = useMutation({
     mutationFn: updateAccount,
@@ -104,6 +105,27 @@ export const EditAccountDialog = ({ open, onOpenChange, account }: EditAccountDi
             <Input id="balance" {...register("balance")} className="bg-background" />
             {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
           </div>
+          {accountType === 'credit_card' && (
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="limit">Limite do Cartão</Label>
+                <Input id="limit" {...register("limit")} placeholder="R$ 1000,00" className="bg-background" />
+                {errors.limit && <p className="text-red-500 text-sm">{errors.limit.message}</p>}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="closing_day">Dia de Fechamento</Label>
+                  <Input id="closing_day" type="number" {...register("closing_day")} placeholder="Ex: 20" className="bg-background" />
+                  {errors.closing_day && <p className="text-red-500 text-sm">{errors.closing_day.message}</p>}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="due_day">Dia de Vencimento</Label>
+                  <Input id="due_day" type="number" {...register("due_day")} placeholder="Ex: 28" className="bg-background" />
+                  {errors.due_day && <p className="text-red-500 text-sm">{errors.due_day.message}</p>}
+                </div>
+              </div>
+            </>
+          )}
           <div className="grid gap-2">
             <Label>Ícone</Label>
             <Controller name="icon" control={control} render={({ field }) => (
