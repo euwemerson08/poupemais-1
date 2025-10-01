@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const recurrenceIntervals = ['daily', 'weekly', 'monthly', 'yearly'] as const;
+
 export const receivableSchema = z.object({
   id: z.string().uuid().optional(),
   description: z.string().min(1, "Descrição é obrigatória."),
@@ -9,6 +11,22 @@ export const receivableSchema = z.object({
   ),
   due_date: z.date({ required_error: "Data de vencimento é obrigatória." }),
   category_id: z.string().min(1, "Categoria é obrigatória."),
+  
+  // New fields for recurrence
+  is_recurring: z.boolean().optional(),
+  recurrence_interval: z.enum(recurrenceIntervals).optional(),
+  recurrence_end_date: z.date().optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.is_recurring) {
+    if (!data.recurrence_interval) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Intervalo de recorrência é obrigatório para recebimentos recorrentes.",
+        path: ['recurrence_interval'],
+      });
+    }
+    // due_date will be used as start_date for recurring
+  }
 });
 
 export type ReceivableFormData = z.infer<typeof receivableSchema>;
@@ -22,4 +40,17 @@ export interface Receivable {
   received_at: string | null;
   category_name: string | null;
   category_icon: string | null;
+}
+
+export interface RecurringReceivable {
+  id: string;
+  user_id: string;
+  description: string;
+  amount: number;
+  start_date: string;
+  recurrence_interval: typeof recurrenceIntervals[number];
+  end_date: string | null;
+  category_name: string | null;
+  category_icon: string | null;
+  created_at: string;
 }
