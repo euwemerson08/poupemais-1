@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Receivable } from "@/types/receivable";
 import { format, parseISO, isPast } from "date-fns";
-import { MoreVertical, CheckCircle, LucideIcon, MoreHorizontal } from "lucide-react";
+import { MoreVertical, CheckCircle, LucideIcon, MoreHorizontal, Repeat } from "lucide-react"; // Import Repeat icon
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,14 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 };
 
-const deleteReceivable = async (id: string) => {
-  const { error } = await supabase.rpc('delete_receivable', { p_receivable_id: id });
-  if (error) throw new Error(error.message);
+const deleteReceivable = async (id: string, isRecurring: boolean) => {
+  if (isRecurring) {
+    const { error } = await supabase.rpc('delete_recurring_receivable', { p_recurring_receivable_id: id });
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.rpc('delete_receivable', { p_receivable_id: id });
+    if (error) throw new Error(error.message);
+  }
 };
 
 interface ReceivableItemProps {
@@ -31,7 +36,9 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
   const [isReceivedDialogOpen, setIsReceivedDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const isOverdue = isPast(parseISO(receivable.due_date)) && receivable.status === 'pending';
+
+  const isRecurringTemplate = receivable.is_recurring_template;
+  const isOverdue = !isRecurringTemplate && isPast(parseISO(receivable.due_date)) && receivable.status === 'pending';
   const queryClient = useQueryClient();
 
   const category = categories.find(c => c.name === receivable.category_name);
@@ -39,19 +46,49 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
   const categoryColor = category?.color || '#6B7280'; // Default gray
 
   const deleteMutation = useMutation({
-    mutationFn: deleteReceivable,
+    mutationFn: ({ id, isRecurring }: { id: string; isRecurring: boolean }) => deleteReceivable(id, isRecurring),
     onSuccess: () => {
-      showSuccess("Conta a receber excluída com sucesso!");
+      showSuccess("Item excluído com sucesso!"); // Mensagem mais genérica
       queryClient.invalidateQueries({ queryKey: ["receivables"] });
+      queryClient.invalidateQueries({ queryKey: ["recurring_receivables"] });
     },
     onError: (err) => {
-      showError(`Erro ao excluir conta a receber: ${err.message}`);
+      showError(`Erro ao excluir item: ${err.message}`); // Mensagem mais genérica
     },
   });
 
   const handleConfirmDelete = () => {
-    deleteMutation.mutate(receivable.id);
+    deleteMutation.mutate({ id: receivable.id, isRecurring: !!isRecurringTemplate }); // Passar isRecurringTemplate
     setIsDeleteDialogOpen(false);
+  };
+
+  const getStatusBadge = () => {
+    if (isRecurringTemplate) {
+      return (
+        <Badge variant="outline" className="bg-blue-600/20 text-blue-400 border-blue-600/30">
+          <Repeat className="h-3 w-3 mr-1" /> Recorrente
+        </Badge>
+      );
+    }
+    if (receivable.status === 'received') {
+      return (
+        <Badge variant="default" className="bg-green-600/20 text-green-400 border-green-600/30">
+          Recebido
+        </Badge>
+      );
+    }
+    if (isOverdue) {
+      return (
+        <Badge variant="outline" className="border-red-500/30 text-red-400">
+          Vencido
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline">
+        Pendente
+      </Badge>
+    );
   };
 
   return (
@@ -63,17 +100,23 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
           </div>
           <div>
             <p className="font-medium">{receivable.description}</p>
-            <p className={`text-sm ${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
-              Vence em: {format(parseISO(receivable.due_date), "dd/MM/yyyy")}
+            <p className={`text-sm ${isOverdue && !isRecurringTemplate ? 'text-red-400' : 'text-gray-400'}`}>
+              {isRecurringTemplate ? (
+                <>
+                  Início: {format(parseISO(receivable.due_date), "dd/MM/yyyy")}
+                  {receivable.recurrence_end_date && ` · Fim: ${format(parseISO(receivable.recurrence_end_date), "dd/MM/yyyy")}`}
+                  {receivable.recurrence_interval && ` (${receivable.recurrence_interval})`}
+                </>
+              ) : (
+                `Vence em: ${format(parseISO(receivable.due_date), "dd/MM/yyyy")}`
+              )}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <p className="font-semibold text-lg">{formatCurrency(receivable.amount)}</p>
-          <Badge variant={receivable.status === 'received' ? 'default' : 'outline'} className={receivable.status === 'received' ? 'bg-green-600/20 text-green-400 border-green-600/30' : isOverdue ? 'border-red-500/30 text-red-400' : ''}>
-            {receivable.status === 'received' ? 'Recebido' : isOverdue ? 'Vencido' : 'Pendente'}
-          </Badge>
-          {receivable.status === 'pending' && (
+          {getStatusBadge()}
+          {!isRecurringTemplate && receivable.status === 'pending' && (
             <Button size="sm" onClick={() => setIsReceivedDialogOpen(true)}>
               <CheckCircle className="mr-2 h-4 w-4" />
               Receber
@@ -86,7 +129,7 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
-              <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
+              <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={isRecurringTemplate}>
                 Editar
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -106,7 +149,7 @@ export const ReceivableItem = ({ receivable }: ReceivableItemProps) => {
           onOpenChange={setIsReceivedDialogOpen}
         />
       )}
-      {isEditDialogOpen && (
+      {isEditDialogOpen && !isRecurringTemplate && ( // Só abre se não for template recorrente
         <EditReceivableDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}

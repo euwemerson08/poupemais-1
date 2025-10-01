@@ -1,24 +1,65 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Receivable } from "@/types/receivable";
+import { Receivable, RecurringReceivable } from "@/types/receivable"; // Import RecurringReceivable
 import { AddReceivableDialog } from "@/components/AddReceivableDialog";
 import { ReceivableItem } from "@/components/ReceivableItem";
 import { Loader2, FileText } from "lucide-react";
+import { format } from "date-fns"; // Necessário para formatar datas de recorrentes
 
-const getReceivables = async (): Promise<Receivable[]> => {
-  const { data, error } = await supabase
+const getReceivablesAndRecurring = async (): Promise<Receivable[]> => {
+  const { data: oneTimeReceivables, error: oneTimeError } = await supabase
     .from("receivables")
     .select("*")
     .order("due_date", { ascending: true });
 
-  if (error) throw new Error(error.message);
-  return data as Receivable[];
+  if (oneTimeError) {
+    throw new Error(oneTimeError.message);
+  }
+
+  const { data: recurringReceivables, error: recurringError } = await supabase
+    .from("recurring_receivables")
+    .select("*")
+    .order("start_date", { ascending: true });
+
+  if (recurringError) {
+    throw new Error(recurringError.message);
+  }
+
+  const combinedReceivables: Receivable[] = [];
+
+  // Adicionar recebimentos únicos
+  if (oneTimeReceivables) {
+    combinedReceivables.push(...(oneTimeReceivables as Receivable[]));
+  }
+
+  // Adicionar recebimentos recorrentes como templates
+  if (recurringReceivables) {
+    const mappedRecurring: Receivable[] = (recurringReceivables as RecurringReceivable[]).map(rr => ({
+      id: rr.id,
+      description: rr.description,
+      amount: rr.amount,
+      due_date: rr.start_date, // Usar start_date como due_date para exibição
+      status: 'recurring_template', // Novo status para templates
+      received_at: null,
+      category_name: rr.category_name,
+      category_icon: rr.category_icon,
+      is_recurring_template: true,
+      recurrence_interval: rr.recurrence_interval,
+      recurrence_end_date: rr.end_date,
+    }));
+    combinedReceivables.push(...mappedRecurring);
+  }
+
+  // Ordenar todos por due_date (ou start_date para templates recorrentes)
+  combinedReceivables.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+
+  return combinedReceivables;
 };
 
 const Receivables = () => {
   const { data: receivables, isLoading } = useQuery({
-    queryKey: ["receivables"],
-    queryFn: getReceivables,
+    queryKey: ["receivables", "recurring_receivables"], // Invalidar ambas as queries
+    queryFn: getReceivablesAndRecurring,
   });
 
   return (

@@ -47,10 +47,14 @@ export interface Receivable {
   description: string;
   amount: number;
   due_date: string;
-  status: 'pending' | 'received';
+  status: 'pending' | 'received' | 'recurring_template'; // Adicionado 'recurring_template'
   received_at: string | null;
   category_name: string | null;
   category_icon: string | null;
+  // Novos campos para diferenciar e exibir templates recorrentes
+  is_recurring_template?: boolean;
+  recurrence_interval?: typeof recurrenceIntervals[number];
+  recurrence_end_date?: string | null;
 }
 
 export interface RecurringReceivable {
