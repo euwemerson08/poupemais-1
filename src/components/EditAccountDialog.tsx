@@ -100,11 +100,13 @@ export const EditAccountDialog = ({ open, onOpenChange, account }: EditAccountDi
               </Select>
             )} />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="balance">Saldo</Label>
-            <Input id="balance" {...register("balance")} className="bg-background" />
-            {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
-          </div>
+          {accountType !== 'credit_card' && (
+            <div className="grid gap-2">
+              <Label htmlFor="balance">Saldo</Label>
+              <Input id="balance" {...register("balance")} className="bg-background" />
+              {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
+            </div>
+          )}
           {accountType === 'credit_card' && (
             <>
               <div className="grid gap-2">

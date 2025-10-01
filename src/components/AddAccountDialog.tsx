@@ -55,6 +55,7 @@ export const AddAccountDialog = () => {
 
   const selectedColor = watch("color");
   const accountType = watch("type");
+  const balanceLabel = accountType === 'credit_card' ? 'Fatura Inicial' : 'Saldo Inicial';
 
   const mutation = useMutation({
     mutationFn: createAccount,
@@ -107,7 +108,7 @@ export const AddAccountDialog = () => {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="balance">Saldo Inicial</Label>
+            <Label htmlFor="balance">{balanceLabel}</Label>
             <Input id="balance" {...register("balance")} placeholder="R$ 0,00" className="bg-background" />
             {errors.balance && <p className="text-red-500 text-sm">{errors.balance.message}</p>}
           </div>
