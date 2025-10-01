@@ -43,7 +43,6 @@ export const TransactionItem = ({ transaction, onEdit }: TransactionItemProps) =
 
   const Icon = transaction.category_icon && iconMap[transaction.category_icon] ? iconMap[transaction.category_icon] : MoreHorizontal;
   const isIncome = transaction.amount >= 0;
-  const canEdit = !transaction.is_installment;
 
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
@@ -88,9 +87,11 @@ export const TransactionItem = ({ transaction, onEdit }: TransactionItemProps) =
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
-              <DropdownMenuItem onSelect={() => onEdit(transaction)} disabled={!canEdit}>
-                Editar
-              </DropdownMenuItem>
+              {!transaction.is_installment && (
+                <DropdownMenuItem onSelect={() => onEdit(transaction)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onSelect={() => setIsDeleteDialogOpen(true)}
                 className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
