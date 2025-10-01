@@ -10,6 +10,7 @@ import CreditCards from "./pages/CreditCards";
 import Invoices from "./pages/Invoices";
 import Transactions from "./pages/Transactions";
 import FixedExpenses from "./pages/FixedExpenses";
+import FinancialPlan from "./pages/FinancialPlan";
 import Login from "./pages/Login";
 import { RootLayout } from "./components/RootLayout";
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/fixed-expenses" element={<FixedExpenses />} />
+            <Route path="/financial-plan" element={<FinancialPlan />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

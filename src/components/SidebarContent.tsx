@@ -49,7 +49,7 @@ export const SidebarContent = () => {
         <NavLink href="/fixed-expenses" icon={<Landmark size={20} />} active={pathname === "/fixed-expenses"}>
           Despesas Fixas
         </NavLink>
-        <NavLink href="#" icon={<Target size={20} />}>
+        <NavLink href="/financial-plan" icon={<Target size={20} />} active={pathname === "/financial-plan"}>
           Plano Financeiro
         </NavLink>
         <NavLink href="#" icon={<CalendarPlus size={20} />}>
