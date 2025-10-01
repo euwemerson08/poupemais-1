@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { StatCard } from "./StatCard";
 import { OverviewChart } from "./OverviewChart";
 import { RecentTransactions } from "./RecentTransactions";
@@ -5,29 +6,57 @@ import { ArrowUp, ArrowDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SidebarNav } from "./SidebarNav";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export const Dashboard = () => {
+  const [iconSize, setIconSize] = useState("h-16 w-16");
+
   return (
     <div>
-      <header className="flex items-center gap-4 pb-8">
-        <div className="lg:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-16 w-16" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col p-4 bg-card border-r-0">
-              <SidebarNav />
-            </SheetContent>
-          </Sheet>
+      <header className="flex flex-wrap items-center justify-between gap-4 pb-8">
+        <div className="flex items-center gap-4">
+          <div className="lg:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className={iconSize} />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col p-4 bg-card border-r-0">
+                <SidebarNav />
+              </SheetContent>
+            </Sheet>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-gray-400 mt-1">
+              Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-gray-400 mt-1">
-            Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
-          </p>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="icon-size-select" className="text-sm text-gray-400">
+            Tamanho do Ícone:
+          </Label>
+          <Select onValueChange={setIconSize} defaultValue={iconSize}>
+            <SelectTrigger id="icon-size-select" className="w-[150px]">
+              <SelectValue placeholder="Selecionar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="h-8 w-8">Pequeno</SelectItem>
+              <SelectItem value="h-10 w-10">Médio</SelectItem>
+              <SelectItem value="h-12 w-12">Grande</SelectItem>
+              <SelectItem value="h-16 w-16">Extra Grande</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
 
