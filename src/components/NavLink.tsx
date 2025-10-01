@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import React from "react";
+import { Link } from "react-router-dom";
 
 interface NavLinkProps {
   href: string;
@@ -10,8 +11,8 @@ interface NavLinkProps {
 
 export const NavLink = ({ href, icon, children, active = false }: NavLinkProps) => {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className={cn(
         "flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors",
         active
@@ -21,6 +22,6 @@ export const NavLink = ({ href, icon, children, active = false }: NavLinkProps) 
     >
       {icon}
       {children}
-    </a>
+    </Link>
   );
 };

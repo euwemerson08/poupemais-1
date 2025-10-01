@@ -14,8 +14,11 @@ import {
   PiggyBank,
 } from "lucide-react";
 import { NavLink } from "./NavLink";
+import { useLocation } from "react-router-dom";
 
 export const SidebarContent = () => {
+  const { pathname } = useLocation();
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-10">
@@ -23,10 +26,10 @@ export const SidebarContent = () => {
         <h1 className="text-2xl font-bold">Financely</h1>
       </div>
       <nav className="flex flex-col gap-2 flex-1">
-        <NavLink href="#" icon={<LayoutDashboard size={20} />} active>
+        <NavLink href="/" icon={<LayoutDashboard size={20} />} active={pathname === "/"}>
           Dashboard
         </NavLink>
-        <NavLink href="#" icon={<Wallet size={20} />}>
+        <NavLink href="/accounts" icon={<Wallet size={20} />} active={pathname === "/accounts"}>
           Contas
         </NavLink>
         <NavLink href="#" icon={<ShoppingCart size={20} />}>
