@@ -38,8 +38,15 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
 
   const totalItems = list.items.length;
   const purchasedItems = list.items.filter(item => item.is_purchased).length;
+  
+  // Modificação aqui: calcular o total apenas dos itens comprados
   const totalAmount = useMemo(() => {
-    return list.items.reduce((sum, item) => sum + (item.price || 0), 0);
+    return list.items.reduce((sum, item) => {
+      if (item.is_purchased) {
+        return sum + (item.price || 0);
+      }
+      return sum;
+    }, 0);
   }, [list.items]);
 
   const deleteListMutation = useMutation({
