@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { DeleteFixedExpenseDialog } from "./DeleteFixedExpenseDialog";
-// import { EditFixedExpenseDialog } from "./EditFixedExpenseDialog"; // Will be created later
+import { EditFixedExpenseDialog } from "./EditFixedExpenseDialog";
 
 const categoryIconMap: { [key: string]: LucideIcon } = {
   'Alimentação': UtensilsCrossed, 'Moradia': Home, 'Transporte': Car, 'Lazer': Film,
@@ -38,7 +38,7 @@ interface FixedExpenseItemProps {
 export const FixedExpenseItem = ({ expense }: FixedExpenseItemProps) => {
   const Icon = categoryIconMap[expense.category_name] || MoreHorizontal;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  // const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -78,7 +78,7 @@ export const FixedExpenseItem = ({ expense }: FixedExpenseItemProps) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card border-border">
-              <DropdownMenuItem onSelect={() => alert('Edit not implemented yet')}>
+              <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
                 Editar
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -96,13 +96,13 @@ export const FixedExpenseItem = ({ expense }: FixedExpenseItemProps) => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
       />
-      {/* {isEditDialogOpen && (
+      {isEditDialogOpen && (
         <EditFixedExpenseDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           expense={expense}
         />
-      )} */}
+      )}
     </>
   );
 };
