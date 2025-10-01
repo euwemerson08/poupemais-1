@@ -7,15 +7,18 @@ import { Loader2, FileText } from "lucide-react";
 import { format } from "date-fns"; // Necessário para formatar datas de recorrentes
 
 const getReceivablesAndRecurring = async (): Promise<Receivable[]> => {
+  // Buscar recebimentos únicos com status 'pending'
   const { data: oneTimeReceivables, error: oneTimeError } = await supabase
     .from("receivables")
     .select("*")
+    .eq("status", "pending") // Adicionado filtro para status 'pending'
     .order("due_date", { ascending: true });
 
   if (oneTimeError) {
     throw new Error(oneTimeError.message);
   }
 
+  // Buscar todos os recebimentos recorrentes (templates)
   const { data: recurringReceivables, error: recurringError } = await supabase
     .from("recurring_receivables")
     .select("*")
@@ -27,7 +30,7 @@ const getReceivablesAndRecurring = async (): Promise<Receivable[]> => {
 
   const combinedReceivables: Receivable[] = [];
 
-  // Adicionar recebimentos únicos
+  // Adicionar recebimentos únicos (apenas os pendentes)
   if (oneTimeReceivables) {
     combinedReceivables.push(...(oneTimeReceivables as Receivable[]));
   }
