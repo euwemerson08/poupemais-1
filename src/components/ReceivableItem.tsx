@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns"; // Adicionado parseISO
 import { ptBR } from "date-fns/locale";
 import { MoreVertical, Edit, Trash, CheckCircle } from "lucide-react";
 import {
@@ -64,9 +64,9 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
           <p className="font-medium text-lg">{receivable.description}</p>
           <p className="text-sm text-muted-foreground">
             {isRecurringTemplate ? (
-              `Início: ${format(new Date(receivable.start_date), "dd/MM/yyyy", { locale: ptBR })} - Intervalo: ${receivable.recurrence_interval}`
+              `Início: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })} - Intervalo: ${receivable.recurrence_interval}`
             ) : (
-              `Vencimento: ${format(new Date(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })}`
+              `Vencimento: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })}`
             )}
           </p>
           {receivable.category_name && (
