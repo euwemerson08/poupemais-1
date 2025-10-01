@@ -46,7 +46,7 @@ export const SidebarContent = () => {
         <NavLink href="/invoices" icon={<Receipt size={20} />} active={pathname === "/invoices"}>
           Faturas
         </NavLink>
-        <NavLink href="#" icon={<Landmark size={20} />}>
+        <NavLink href="/fixed-expenses" icon={<Landmark size={20} />} active={pathname === "/fixed-expenses"}>
           Despesas Fixas
         </NavLink>
         <NavLink href="#" icon={<Target size={20} />}>
