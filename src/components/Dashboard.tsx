@@ -16,7 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const Dashboard = () => {
-  const [iconSize, setIconSize] = useState("h-[150px] w-[150px]");
+  const [iconSize, setIconSize] = useState("h-16 w-16");
 
   return (
     <div>
@@ -55,8 +55,6 @@ export const Dashboard = () => {
               <SelectItem value="h-10 w-10">Médio</SelectItem>
               <SelectItem value="h-12 w-12">Grande</SelectItem>
               <SelectItem value="h-16 w-16">Extra Grande</SelectItem>
-              <SelectItem value="h-24 w-24">Tamanho 25</SelectItem>
-              <SelectItem value="h-[150px] w-[150px]">150px</SelectItem>
             </SelectContent>
           </Select>
         </div>
