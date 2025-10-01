@@ -1,8 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { FinancialPlan } from "@/types/financialPlan"; // Corrigido: importação type-only
+import type { FinancialPlan } from "@/types/financialPlan";
 import { AddFinancialPlanDialog } from "@/components/AddFinancialPlanDialog";
 import { FinancialPlanCard } from "@/components/FinancialPlanCard";
 import { Loader2, Target } from "lucide-react";
+import { useQuery } from "@tanstack/react-query"; // Adicionado: Importação do useQuery
 
 const getFinancialPlans = async (): Promise<FinancialPlan[]> => {
   const { data, error } = await supabase
