@@ -14,7 +14,7 @@ export const Dashboard = () => {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu className="h-8 w-8" />
+                <Menu className="h-10 w-10" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
