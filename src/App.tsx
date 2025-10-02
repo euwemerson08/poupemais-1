@@ -1,52 +1,30 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Accounts from "./pages/Accounts";
-import CreditCards from "./pages/CreditCards";
-import Invoices from "./pages/Invoices";
-import Transactions from "./pages/Transactions";
-import FixedExpenses from "./pages/FixedExpenses";
-import FinancialPlan from "./pages/FinancialPlan";
-import Receivables from "./pages/Receivables";
-import FinancialData from "./pages/FinancialData";
-import Settings from "./pages/Settings";
-import ShoppingLists from "./pages/ShoppingLists"; // Importar a nova página de listas de compras
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import { RootLayout } from "./components/RootLayout";
+import Dashboard from "./pages/Dashboard";
+import NotificationSettingsPage from "./pages/NotificationSettingsPage"; // Importar a nova página
+import { SessionContextProvider } from "@supabase/auth-ui-react";
+import { supabase } from "./integrations/supabase/client";
+import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <SessionContextProvider supabaseClient={supabase}>
       <Toaster />
-      <Sonner />
-      <BrowserRouter>
+      <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<RootLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/credit-cards" element={<CreditCards />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/fixed-expenses" element={<FixedExpenses />} />
-            <Route path="/financial-plan" element={<FinancialPlan />} />
-            <Route path="/receivables" element={<Receivables />} />
-            <Route path="/financial-data" element={<FinancialData />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/shopping-lists" element={<ShoppingLists />} /> {/* Nova rota para listas de compras */}
-          </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+          <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+          <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} /> {/* Nova rota */}
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </Router>
+    </SessionContextProvider>
+  );
+}
 
 export default App;
