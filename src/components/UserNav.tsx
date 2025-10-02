@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
-import { Settings } from "lucide-react"; // Importar ícone de configurações
+import { Settings } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface Profile {
   first_name: string;
@@ -44,6 +45,17 @@ export function UserNav() {
     queryKey: ["profile"],
     queryFn: fetchProfile,
   });
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email);
+      }
+    };
+    getEmail();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -71,18 +83,17 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{profile?.first_name} {profile?.last_name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {supabase.auth.getUser().then(res => res.data.user?.email)}
+              {userEmail}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate("/settings/notifications")}> {/* Link para configurações de notificação */}
+          <DropdownMenuItem onClick={() => navigate("/settings/notifications")}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Notificações</span>
             <DropdownMenuShortcut>⇧⌘N</DropdownMenuShortcut>
           </DropdownMenuItem>
-          {/* Outros itens de menu aqui, se houver */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
