@@ -1,26 +1,52 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import NotificationSettingsPage from "./pages/NotificationSettingsPage";
+import NotFound from "./pages/NotFound";
+import Accounts from "./pages/Accounts";
+import CreditCards from "./pages/CreditCards";
+import Invoices from "./pages/Invoices";
+import Transactions from "./pages/Transactions";
+import FixedExpenses from "./pages/FixedExpenses";
+import FinancialPlan from "./pages/FinancialPlan";
+import Receivables from "./pages/Receivables";
+import FinancialData from "./pages/FinancialData";
 import Settings from "./pages/Settings";
-import { Toaster } from "sonner";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { SessionProvider } from "./components/SessionProvider";
+import ShoppingLists from "./pages/ShoppingLists"; // Importar a nova página de listas de compras
+import Login from "./pages/Login";
+import { RootLayout } from "./components/RootLayout";
 
-function App() {
-  return (
-    <SessionProvider>
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
       <Toaster />
-      <Router>
+      <Sonner />
+      <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} />
+          <Route element={<RootLayout />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/accounts" element={<Accounts />} />
+            <Route path="/credit-cards" element={<CreditCards />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/fixed-expenses" element={<FixedExpenses />} />
+            <Route path="/financial-plan" element={<FinancialPlan />} />
+            <Route path="/receivables" element={<Receivables />} />
+            <Route path="/financial-data" element={<FinancialData />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/shopping-lists" element={<ShoppingLists />} /> {/* Nova rota para listas de compras */}
+          </Route>
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
-    </SessionProvider>
-  );
-}
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

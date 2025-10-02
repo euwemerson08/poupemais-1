@@ -1,16 +1,19 @@
-import { NotificationSettingsCard } from "@/components/NotificationSettingsCard";
-import { Separator } from "@/components/ui/separator";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 const Settings = () => {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Configurações</h2>
-      </div>
-      <Separator />
-      <div className="max-w-2xl mx-auto">
-        <NotificationSettingsCard />
-      </div>
+    <div>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">Configurações</h1>
+        <p className="text-gray-400 mt-1">
+          Gerencie suas preferências e configurações do aplicativo.
+        </p>
+      </header>
+
+      <section className="grid grid-cols-1 gap-6">
+        <NotificationSettings />
+        {/* Outras seções de configuração podem ser adicionadas aqui */}
+      </section>
     </div>
   );
 };
