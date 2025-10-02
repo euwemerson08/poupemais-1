@@ -88,6 +88,11 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
     setIsDeleteDialogOpen(false);
   };
 
+  // Determine the date to display based on whether it's an installment
+  const displayDate = transaction.is_installment && transaction.invoice_due_date
+    ? parseISO(transaction.invoice_due_date)
+    : parseISO(transaction.date);
+
   return (
     <>
       <div className="flex items-center justify-between py-4">
@@ -105,7 +110,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
               )}
             </p>
             <p className="text-sm text-gray-400">
-              {transaction.accounts?.name} · {format(parseISO(transaction.date), "dd/MM/yyyy")}
+              {transaction.account_name} · {format(displayDate, "dd/MM/yyyy")}
             </p>
           </div>
         </div>

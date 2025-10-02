@@ -1,24 +1,26 @@
-import { Account } from './account';
+import { Database } from "./supabase";
 
-export interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  date: string;
-  is_paid: boolean;
-  is_installment: boolean;
-  installment_number: number | null;
-  total_installments: number | null;
-  category_name: string | null;
-  category_icon: string | null;
-  accounts: { id: string, name: string, type: string } | null;
-}
+// Type for the raw transaction row from the database
+type RawTransaction = Database['public']['Tables']['transactions']['Row'];
 
-export type TransactionFormData = {
-    description: string;
-    amount: string;
-    date: Date;
-    account_id: string;
-    category_id: string;
-    total_installments: number;
-}
+// Type for the account details returned by the RPC function
+type RpcAccountDetails = {
+  account_name: string;
+  account_type: string;
+  account_balance: number;
+  account_color: string;
+  account_icon: string;
+  account_limit: number | null;
+  account_closing_day: number | null;
+  account_due_day: number | null;
+};
+
+// Type for the invoice details returned by the RPC function
+type RpcInvoiceDetails = {
+  invoice_closing_date: string | null;
+  invoice_due_date: string | null;
+  invoice_status: string | null;
+};
+
+// Combined Transaction type including details from joined tables via RPC
+export type Transaction = RawTransaction & RpcAccountDetails & RpcInvoiceDetails;
