@@ -5,19 +5,19 @@ import { showError, showSuccess } from "@/utils/toast";
 import { ShoppingList } from "@/types/shoppingList";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, PlusCircle, Edit, Trash, CheckSquare } from "lucide-react"; // Adicionado CheckSquare
+import { MoreVertical, PlusCircle, Edit, Trash, CheckSquare, ChevronUp, ChevronDown } from "lucide-react"; // Adicionado ChevronUp e ChevronDown
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator, // Adicionado Separator
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { AddShoppingListItemDialog } from "./AddShoppingListItemDialog";
 import { ShoppingListItemComponent } from "./ShoppingListItemComponent";
 import { DeleteShoppingListDialog } from "./DeleteShoppingListDialog";
 import { EditShoppingListDialog } from "./EditShoppingListDialog";
-import { ConfirmDialog } from "./ConfirmDialog"; // Importar ConfirmDialog
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface ShoppingListCardProps {
   list: ShoppingList;
@@ -45,7 +45,8 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isUnmarkAllDialogOpen, setIsUnmarkAllDialogOpen] = useState(false); // Novo estado para o diálogo
+  const [isUnmarkAllDialogOpen, setIsUnmarkAllDialogOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false); // Novo estado para minimizar
 
   const totalItems = list.items.length;
   const purchasedItems = list.items.filter(item => item.is_purchased).length;
@@ -95,11 +96,16 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
     <>
       <Card className="bg-card border-border">
         <CardHeader className="flex-row items-center justify-between pb-2">
-          <div>
-            <CardTitle className="text-xl">{list.name}</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {purchasedItems} de {totalItems} itens comprados
-            </p>
+          <div className="flex items-center gap-2"> {/* Agrupando título e botão de minimizar */}
+            <div>
+              <CardTitle className="text-xl">{list.name}</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {purchasedItems} de {totalItems} itens comprados
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsMinimized(!isMinimized)}>
+              {isMinimized ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
           </div>
           <div className="flex items-center gap-2">
             <p className="font-semibold text-lg">{formatCurrency(totalAmount)}</p>
@@ -113,7 +119,7 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
                 <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
                   <Edit className="mr-2 h-4 w-4" /> Editar Lista
                 </DropdownMenuItem>
-                {purchasedItems > 0 && ( // Mostrar a opção apenas se houver itens marcados
+                {purchasedItems > 0 && (
                   <DropdownMenuItem onSelect={() => setIsUnmarkAllDialogOpen(true)}>
                     <CheckSquare className="mr-2 h-4 w-4" /> Desmarcar Todos
                   </DropdownMenuItem>
@@ -126,20 +132,25 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {list.items.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">Nenhum item nesta lista.</p>
-          ) : (
-            list.items.map(item => (
-              <ShoppingListItemComponent key={item.id} item={item} />
-            ))
-          )}
-        </CardContent>
-        <CardFooter>
-          <Button variant="ghost" className="w-full text-primary hover:text-primary-foreground" onClick={() => setIsAddItemDialogOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
-          </Button>
-        </CardFooter>
+        
+        {!isMinimized && ( // Renderiza CardContent e CardFooter apenas se não estiver minimizado
+          <>
+            <CardContent className="space-y-2">
+              {list.items.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">Nenhum item nesta lista.</p>
+              ) : (
+                list.items.map(item => (
+                  <ShoppingListItemComponent key={item.id} item={item} />
+                ))
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" className="w-full text-primary hover:text-primary-foreground" onClick={() => setIsAddItemDialogOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
+              </Button>
+            </CardFooter>
+          </>
+        )}
       </Card>
 
       {isAddItemDialogOpen && (
