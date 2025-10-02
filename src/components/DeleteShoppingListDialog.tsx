@@ -29,7 +29,7 @@ export const DeleteShoppingListDialog = ({ open, onOpenChange, onConfirm, isLoad
             lista de compras e todos os seus itens.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={isLoading}>Cancelar</Button>
           </AlertDialogCancel>

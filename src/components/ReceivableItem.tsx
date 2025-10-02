@@ -77,10 +77,10 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
 
   return (
     <>
-      <div className="flex items-center justify-between p-4 border-b last:border-b-0">
-        <div className="flex-1">
-          <p className="font-medium text-lg">{receivable.description}</p>
-          <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-b last:border-b-0"> {/* Ajustado para responsividade */}
+        <div className="flex-1 min-w-0"> {/* Changed to flex-1 min-w-0 */}
+          <p className="font-medium text-lg truncate">{receivable.description}</p> {/* Adicionado truncate */}
+          <p className="text-sm text-muted-foreground truncate"> {/* Adicionado truncate */}
             {isRecurringTemplate ? (
               `Início: ${format(parseISO(receivable.due_date), "dd/MM/yyyy", { locale: ptBR })} - Intervalo: ${translateRecurrenceInterval(receivable.recurrence_interval)}`
             ) : (
@@ -93,7 +93,7 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
             </Badge>
           )}
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0 flex-shrink-0"> {/* Adjusted for stacking on small screens */}
           <p className="font-semibold text-lg text-green-600">
             {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(receivable.amount)}
           </p>

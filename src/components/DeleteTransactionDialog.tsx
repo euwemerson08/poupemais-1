@@ -27,7 +27,7 @@ export const DeleteTransactionDialog = ({ open, onOpenChange, onConfirm }: Delet
             transação e ajustará o saldo da conta associada.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
           <AlertDialogCancel asChild>
             <Button variant="outline">Cancelar</Button>
           </AlertDialogCancel>

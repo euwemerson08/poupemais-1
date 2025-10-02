@@ -26,7 +26,7 @@ export const DeleteFixedExpenseDialog = ({ open, onOpenChange, onConfirm }: Dele
             Essa ação não pode ser desfeita. Isso excluirá permanentemente esta despesa fixa.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
           <AlertDialogCancel asChild>
             <Button variant="outline">Cancelar</Button>
           </AlertDialogCancel>

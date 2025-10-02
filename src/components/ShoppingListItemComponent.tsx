@@ -71,25 +71,25 @@ export const ShoppingListItemComponent = ({ item }: ShoppingListItemComponentPro
 
   return (
     <>
-      <div className="flex items-center justify-between py-3 px-4 hover:bg-white/5 transition-colors rounded-md">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 px-4 hover:bg-white/5 transition-colors rounded-md"> {/* Ajustado para responsividade */}
+        <div className="flex items-center gap-3 flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
           <Checkbox
             checked={item.is_purchased}
             onCheckedChange={handleTogglePurchased}
-            className="h-5 w-5 rounded-full border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+            className="h-5 w-5 rounded-full border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground flex-shrink-0"
           />
-          <div>
-            <p className={`font-medium ${item.is_purchased ? "line-through text-muted-foreground" : "text-foreground"}`}>
+          <div className="flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
+            <p className={`font-medium truncate ${item.is_purchased ? "line-through text-muted-foreground" : "text-foreground"}`}> {/* Adicionado truncate */}
               {item.description}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground truncate"> {/* Adicionado truncate */}
               {item.quantity && `Qtd: ${item.quantity}`}
               {item.quantity && item.price && " - "}
               {item.price && formatCurrency(item.price)}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-shrink-0"> {/* Adicionado mt-2 sm:mt-0 e flex-shrink-0 */}
           <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
             <Edit className="h-4 w-4 text-gray-400 hover:text-foreground" />
           </Button>

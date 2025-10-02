@@ -153,7 +153,7 @@ export const MarkAsReceivedDialog = ({ open, onOpenChange, receivable }: MarkAsR
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
               <Button type="submit" disabled={markAsReceivedMutation.isPending}>
                 {markAsReceivedMutation.isPending ? "Recebendo..." : "Confirmar Recebimento"}
               </Button>

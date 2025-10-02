@@ -27,7 +27,7 @@ interface CategoryPickerProps {
 
 export const CategoryPicker = ({ value, onChange }: CategoryPickerProps) => {
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"> {/* Ajustado para responsividade */}
       {categories.map((category) => {
         const Icon = category.icon;
         const isSelected = value === category.id;

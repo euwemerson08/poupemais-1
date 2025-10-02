@@ -87,7 +87,7 @@ export const AddCreditCardDialog = () => {
             <Input id="limit" {...register("limit")} placeholder="R$ 1000,00" className="bg-background" />
             {errors.limit && <p className="text-red-500 text-sm">{errors.limit.message}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Ajustado para responsividade */}
             <div className="grid gap-2">
               <Label htmlFor="closing_day">Dia de Fechamento</Label>
               <Input id="closing_day" type="number" {...register("closing_day")} placeholder="Ex: 20" className="bg-background" />

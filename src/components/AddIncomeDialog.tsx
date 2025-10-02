@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } => "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
@@ -99,7 +99,7 @@ export const AddIncomeDialog = () => {
             <Input id="description" {...register("description")} placeholder="Ex: Salário" className="bg-background" />
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Ajustado para responsividade */}
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor</Label>
               <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />

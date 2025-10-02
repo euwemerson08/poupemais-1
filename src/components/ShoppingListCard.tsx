@@ -95,19 +95,19 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
   return (
     <>
       <Card className="bg-card border-border">
-        <CardHeader className="flex-row items-center justify-between pb-2">
-          <div className="flex items-center gap-2"> {/* Agrupando título e botão de minimizar */}
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-2"> {/* Ajustado para responsividade */}
+          <div className="flex items-center gap-2 mb-2 sm:mb-0"> {/* Adicionado mb-2 sm:mb-0 */}
             <div>
               <CardTitle className="text-xl">{list.name}</CardTitle>
               <p className="text-sm text-muted-foreground">
                 {purchasedItems} de {totalItems} itens comprados
               </p>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsMinimized(!isMinimized)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => setIsMinimized(!isMinimized)}> {/* Adicionado flex-shrink-0 */}
               {isMinimized ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0"> {/* Adicionado flex-shrink-0 */}
             <p className="font-semibold text-lg">{formatCurrency(totalAmount)}</p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

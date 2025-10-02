@@ -55,16 +55,18 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
 
               return (
                 <div key={transaction.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", styles.bg)}>
+                  <div className="flex items-center gap-3 flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
+                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0", styles.bg)}> {/* Adicionado flex-shrink-0 */}
                       <Icon className={cn("h-4 w-4", styles.text)} />
                     </div>
-                    <div>
-                      <p className="font-medium">{transaction.description}</p>
-                      <p className="text-sm text-gray-400">{format(parseISO(transaction.date), "dd/MM/yyyy")}</p>
+                    <div className="flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
+                      <p className="font-medium truncate">{transaction.description}</p> {/* Adicionado truncate */}
+                      <p className="text-sm text-gray-400 truncate">{/* Adicionado truncate */}
+                        {transaction.accounts?.name} · {format(parseISO(transaction.date), "dd/MM/yyyy")}
+                      </p>
                     </div>
                   </div>
-                  <p className={`font-semibold ${isIncome ? "text-green-500" : "text-red-500"}`}>
+                  <p className={`font-semibold ${isIncome ? "text-green-500" : "text-red-500"} flex-shrink-0`}> {/* Adicionado flex-shrink-0 */}
                     {isIncome ? "+ " : "- "}
                     {formatCurrency(transaction.amount)}
                   </p>
