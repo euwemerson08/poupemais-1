@@ -5,17 +5,19 @@ import { showError, showSuccess } from "@/utils/toast";
 import { ShoppingList } from "@/types/shoppingList";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, PlusCircle, Edit, Trash } from "lucide-react";
+import { MoreVertical, PlusCircle, Edit, Trash, CheckSquare } from "lucide-react"; // Adicionado CheckSquare
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator, // Adicionado Separator
 } from "@/components/ui/dropdown-menu";
 import { AddShoppingListItemDialog } from "./AddShoppingListItemDialog";
 import { ShoppingListItemComponent } from "./ShoppingListItemComponent";
 import { DeleteShoppingListDialog } from "./DeleteShoppingListDialog";
 import { EditShoppingListDialog } from "./EditShoppingListDialog";
+import { ConfirmDialog } from "./ConfirmDialog"; // Importar ConfirmDialog
 
 interface ShoppingListCardProps {
   list: ShoppingList;
@@ -23,6 +25,14 @@ interface ShoppingListCardProps {
 
 const deleteShoppingList = async (listId: string) => {
   const { error } = await supabase.from("shopping_lists").delete().eq("id", listId);
+  if (error) throw new Error(error.message);
+};
+
+const unmarkAllItems = async (listId: string) => {
+  const { error } = await supabase
+    .from("shopping_list_items")
+    .update({ is_purchased: false })
+    .eq("list_id", listId);
   if (error) throw new Error(error.message);
 };
 
@@ -35,11 +45,11 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isUnmarkAllDialogOpen, setIsUnmarkAllDialogOpen] = useState(false); // Novo estado para o diálogo
 
   const totalItems = list.items.length;
   const purchasedItems = list.items.filter(item => item.is_purchased).length;
   
-  // Modificação aqui: calcular o total apenas dos itens comprados
   const totalAmount = useMemo(() => {
     return list.items.reduce((sum, item) => {
       if (item.is_purchased) {
@@ -60,9 +70,25 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
     },
   });
 
+  const unmarkAllMutation = useMutation({
+    mutationFn: unmarkAllItems,
+    onSuccess: () => {
+      showSuccess("Todos os itens foram desmarcados!");
+      queryClient.invalidateQueries({ queryKey: ["shopping_lists"] });
+    },
+    onError: (err) => {
+      showError(`Erro ao desmarcar itens: ${err.message}`);
+    },
+  });
+
   const handleConfirmDelete = () => {
     deleteListMutation.mutate(list.id);
     setIsDeleteDialogOpen(false);
+  };
+
+  const handleConfirmUnmarkAll = () => {
+    unmarkAllMutation.mutate(list.id);
+    setIsUnmarkAllDialogOpen(false);
   };
 
   return (
@@ -87,6 +113,12 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
                 <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
                   <Edit className="mr-2 h-4 w-4" /> Editar Lista
                 </DropdownMenuItem>
+                {purchasedItems > 0 && ( // Mostrar a opção apenas se houver itens marcados
+                  <DropdownMenuItem onSelect={() => setIsUnmarkAllDialogOpen(true)}>
+                    <CheckSquare className="mr-2 h-4 w-4" /> Desmarcar Todos
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => setIsDeleteDialogOpen(true)} className="text-red-600">
                   <Trash className="mr-2 h-4 w-4" /> Excluir Lista
                 </DropdownMenuItem>
@@ -129,6 +161,15 @@ export const ShoppingListCard = ({ list }: ShoppingListCardProps) => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
         isLoading={deleteListMutation.isPending}
+      />
+      <ConfirmDialog
+        open={isUnmarkAllDialogOpen}
+        onOpenChange={setIsUnmarkAllDialogOpen}
+        title="Desmarcar todos os itens?"
+        description="Tem certeza que deseja desmarcar todos os itens desta lista? Esta ação não pode ser desfeita individualmente."
+        onConfirm={handleConfirmUnmarkAll}
+        confirmText="Desmarcar"
+        isLoading={unmarkAllMutation.isPending}
       />
     </>
   );
