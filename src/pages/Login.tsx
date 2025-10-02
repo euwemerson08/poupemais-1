@@ -48,8 +48,7 @@ const Login = () => {
                 password_input_placeholder: 'Sua senha',
                 button_label: 'Entrar',
                 link_text: 'Já tem uma conta? Entrar',
-                // A propriedade 'forgot_password_link_text' não é suportada diretamente aqui.
-                // O link para 'Esqueceu sua senha?' é gerado automaticamente se 'forgotten_password' estiver configurado.
+                forgot_password_link_text: 'Esqueceu sua senha?',
               },
               sign_up: {
                 link_text: 'Não tem uma conta? Cadastre-se',

@@ -104,7 +104,7 @@ export const EditReceivableDialog = ({ open, onOpenChange, receivable, isRecurri
             <Input id="description" {...register("description")} className="bg-background" />
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Ajustado para responsividade */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor</Label>
               <Input id="amount" {...register("amount")} className="bg-background" />
@@ -176,7 +176,7 @@ export const EditReceivableDialog = ({ open, onOpenChange, receivable, isRecurri
             </>
           )}
 
-          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" className="bg-[#E63980] hover:bg-[#d63374] text-white" disabled={mutation.isPending}>
               {mutation.isPending ? "Salvando..." : "Salvar Alterações"}

@@ -105,7 +105,7 @@ export const AddExpenseDialog = () => {
             <Input id="description" {...register("description")} placeholder="Ex: Jantar com amigos" className="bg-background" />
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Ajustado para responsividade */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor</Label>
               <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />

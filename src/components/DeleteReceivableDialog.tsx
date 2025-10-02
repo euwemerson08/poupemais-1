@@ -27,7 +27,7 @@ export const DeleteReceivableDialog = ({ open, onOpenChange, onConfirm }: Delete
             conta a receber.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"> {/* Ajustado para responsividade */}
+        <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button variant="outline">Cancelar</Button>
           </AlertDialogCancel>

@@ -90,19 +90,19 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4"> {/* Ajustado para responsividade */}
-        <div className="flex items-center gap-4 flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
-          <div className={cn("h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0", styles.bg)}> {/* Adicionado flex-shrink-0 */}
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center gap-4">
+          <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", styles.bg)}>
             {Icon ? <Icon className={cn("h-5 w-5", styles.text)} /> : <MoreHorizontal className={cn("h-5 w-5", styles.text)} />}
           </div>
-          <div className="flex-1 min-w-0"> {/* Adicionado flex-1 min-w-0 */}
-            <p className="font-medium truncate">{transaction.description}</p> {/* Adicionado truncate */}
-            <p className="text-sm text-gray-400 truncate"> {/* Adicionado truncate */}
+          <div>
+            <p className="font-medium">{transaction.description}</p>
+            <p className="text-sm text-gray-400">
               {transaction.accounts?.name} · {format(parseISO(transaction.date), "dd/MM/yyyy")}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-shrink-0"> {/* Adicionado mt-2 sm:mt-0 e flex-shrink-0 */}
+        <div className="flex items-center gap-2">
           <p className={`font-semibold ${isIncome ? "text-green-500" : "text-red-500"}`}>
             {formatCurrency(transaction.amount)}
           </p>

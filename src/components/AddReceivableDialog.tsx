@@ -103,28 +103,10 @@ export const AddReceivableDialog = () => {
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> {/* Ajustado para responsividade */}
-            <div className="grid gap-2">
-              <Label htmlFor="amount">Valor</Label>
-              <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />
-              {errors.amount && <p className="text-red-500 text-sm">{errors.amount.message}</p>}
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Data de Vencimento</Label>
-              <Controller name="due_date" control={control} render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="justify-start font-normal bg-background">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "dd/MM/yyyy") : <span>Escolha uma data</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
-                </Popover>
-              )} />
-              {errors.due_date && <p className="text-red-500 text-sm">{errors.due_date.message}</p>}
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="amount">Valor</Label>
+            <Input id="amount" {...register("amount")} placeholder="R$ 0,00" className="bg-background" />
+            {errors.amount && <p className="text-red-500 text-sm">{errors.amount.message}</p>}
           </div>
 
           <div className="grid gap-2">
@@ -133,6 +115,22 @@ export const AddReceivableDialog = () => {
               <CategoryPicker value={field.value} onChange={field.onChange} />
             )} />
             {errors.category_id && <p className="text-red-500 text-sm">{errors.category_id.message}</p>}
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Data de Vencimento</Label>
+            <Controller name="due_date" control={control} render={({ field }) => (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start font-normal bg-background">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {field.value ? format(field.value, "dd/MM/yyyy") : <span>Escolha uma data</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+              </Popover>
+            )} />
+            {errors.due_date && <p className="text-red-500 text-sm">{errors.due_date.message}</p>}
           </div>
 
           <div className="flex items-center space-x-2">

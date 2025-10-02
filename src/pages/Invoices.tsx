@@ -128,7 +128,7 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
       {selectedInvoice && (
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row justify-between sm:items-start"> {/* Ajustado para responsividade */}
+            <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-2xl">{formatCurrency(selectedInvoice.total ?? 0)}</CardTitle>
                 <p className="text-gray-400">Valor total da fatura</p>
@@ -167,29 +167,27 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
             <CardTitle>Transações da Fatura</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto"> {/* Adicionado para rolagem horizontal em telas pequenas */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedInvoice.transactions.map((tx) => (
+                  <TableRow key={tx.id}>
+                    <TableCell>{formatDate(tx.date)}</TableCell>
+                    <TableCell>
+                      {tx.description}
+                      {tx.is_installment && <span className="text-xs text-gray-400 ml-2">{tx.installment_number}/{tx.total_installments}</span>}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(tx.amount)}</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedInvoice.transactions.map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell>{formatDate(tx.date)}</TableCell>
-                      <TableCell>
-                        {tx.description}
-                        {tx.is_installment && <span className="text-xs text-gray-400 ml-2">{tx.installment_number}/{tx.total_installments}</span>}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(tx.amount)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       ) : (
@@ -226,7 +224,7 @@ const Invoices = () => {
         </div>
       ) : (
         <Tabs defaultValue={creditCards[0].id} className="w-full">
-          <TabsList className="flex flex-wrap h-auto"> {/* Adicionado flex-wrap para TabsList */}
+          <TabsList>
             {creditCards.map((card) => (
               <TabsTrigger key={card.id} value={card.id}>{card.name}</TabsTrigger>
             ))}
