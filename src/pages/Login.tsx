@@ -3,7 +3,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { PiggyBank } from 'lucide-react';
+// Removido o import de PiggyBank, pois será substituído pela imagem da logo
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,8 +22,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
         <div className="flex items-center justify-center gap-2">
-          <PiggyBank className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-center">Financely</h1>
+          <img src="/LOGO.png" alt="Financely Logo" className="h-8" />
         </div>
         <Auth
           supabaseClient={supabase}

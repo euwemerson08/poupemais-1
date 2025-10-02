@@ -10,7 +10,6 @@ import {
   BarChart,
   Settings,
   LogOut,
-  PiggyBank,
   Receipt,
 } from "lucide-react";
 import { NavLink } from "./NavLink";
@@ -27,8 +26,7 @@ export const SidebarContent = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-10">
-        <PiggyBank className="h-8 w-8 text-primary" />
-        <h1 className="text-2xl font-bold">Financely</h1>
+        <img src="/LOGO.png" alt="Financely Logo" className="h-8" />
       </div>
       <nav className="flex flex-col gap-2 flex-1">
         <NavLink href="/" icon={<LayoutDashboard size={20} />} active={pathname === "/"}>
