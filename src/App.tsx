@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import NotificationSettingsPage from "./pages/NotificationSettingsPage"; // Importar a nova página
+import NotificationSettingsPage from "./pages/NotificationSettingsPage";
+import Settings from "./pages/Settings"; // Importar a página de configurações geral
 import { SessionContextProvider } from "@supabase/auth-ui-react";
 import { supabase } from "./integrations/supabase/client";
 import { Toaster } from "react-hot-toast";
@@ -18,9 +17,9 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-          <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-          <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} /> {/* Nova rota */}
+          {/* Rotas About e Contact removidas pois os arquivos não existem */}
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} /> {/* Rota para a página de configurações geral */}
+          <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} />
         </Routes>
       </Router>
     </SessionContextProvider>
