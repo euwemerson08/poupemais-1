@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { MarkAsReceivedDialog } from "./MarkAsReceivedDialog";
 import { EditReceivableDialog } from "./EditReceivableDialog";
+import { cn } from "@/lib/utils"; // Importação adicionada para usar cn
 
 interface ReceivableItemProps {
   receivable: Receivable;
@@ -71,7 +72,8 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
     deleteMutation.mutate(receivable.id);
   };
 
-  const statusBadgeVariant = receivable.status === "received" ? "success" : "warning";
+  // Ajuste aqui: usar variants existentes e classes Tailwind para cores
+  const statusBadgeClass = receivable.status === "received" ? "bg-green-600 hover:bg-green-600/80" : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30";
 
   return (
     <>
@@ -97,7 +99,7 @@ export const ReceivableItem = ({ receivable, isRecurringTemplate = false }: Rece
           </p>
           <div className="flex items-center space-x-2">
             {!isRecurringTemplate && (
-              <Badge variant={statusBadgeVariant}>
+              <Badge variant="default" className={cn(statusBadgeClass)}> {/* Usando variant="default" e classe customizada */}
                 {receivable.status === "pending" ? "Pendente" : "Recebido"}
               </Badge>
             )}
