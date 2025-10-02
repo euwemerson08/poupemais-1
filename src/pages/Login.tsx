@@ -62,6 +62,9 @@ const Login = () => {
             },
           }}
         />
+        <footer className="p-4 text-center text-sm text-gray-500 border-t border-border mt-auto">
+          Por Apice Tecnologia
+        </footer>
       </div>
     </div>
   );
