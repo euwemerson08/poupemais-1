@@ -27,9 +27,35 @@ const Login = () => {
         </div>
         <Auth
           supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: 'hsl(150 100% 30%)', // Um verde vibrante
+                  brandAccent: 'hsl(150 100% 25%)', // Um verde um pouco mais escuro para hover/active
+                },
+              },
+            },
+          }}
           providers={[]}
           theme="dark"
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: 'Endereço de e-mail',
+                password_label: 'Sua Senha',
+                email_input_placeholder: 'Seu endereço de e-mail',
+                password_input_placeholder: 'Sua senha',
+                button_label: 'Entrar',
+                link_text: 'Já tem uma conta? Entrar',
+                forgot_password_link_text: 'Esqueceu sua senha?',
+              },
+              sign_up: {
+                link_text: 'Não tem uma conta? Cadastre-se',
+              },
+            },
+          }}
         />
       </div>
     </div>
