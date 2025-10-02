@@ -24,9 +24,9 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
+      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg transition-colors duration-200 hover:bg-green-100"> {/* Adicionado hover:bg-green-100 */}
         <div className="flex items-center justify-center gap-2">
-          <h1 className="text-3xl font-bold text-center">Poupe</h1> {/* Nome do aplicativo agora está antes do ícone */}
+          <h1 className="text-3xl font-bold text-center">Poupe</h1>
           <Plus className="h-8 w-8 text-primary" strokeWidth={3} />
         </div>
         <Auth
