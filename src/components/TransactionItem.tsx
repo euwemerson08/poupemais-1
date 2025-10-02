@@ -96,7 +96,14 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
             {Icon ? <Icon className={cn("h-5 w-5", styles.text)} /> : <MoreHorizontal className={cn("h-5 w-5", styles.text)} />}
           </div>
           <div>
-            <p className="font-medium">{transaction.description}</p>
+            <p className="font-medium">
+              {transaction.description}
+              {transaction.is_installment && transaction.installment_number && transaction.total_installments && (
+                <span className="text-xs text-gray-400 ml-2">
+                  ({transaction.installment_number}/{transaction.total_installments})
+                </span>
+              )}
+            </p>
             <p className="text-sm text-gray-400">
               {transaction.accounts?.name} · {format(parseISO(transaction.date), "dd/MM/yyyy")}
             </p>
