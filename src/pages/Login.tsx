@@ -9,25 +9,21 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } = {} } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         navigate('/dashboard');
       }
     });
 
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg transition-colors duration-200 hover:bg-green-100"> {/* Adicionado hover:bg-green-100 */}
+      <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
         <div className="flex items-center justify-center gap-2">
-          <h1 className="text-3xl font-bold text-center">Poupe</h1>
-          <Plus className="h-8 w-8 text-primary" strokeWidth={3} />
+          <Plus className="h-8 w-8 text-primary" strokeWidth={3} /> {/* Ícone Plus agora está mais grosso */}
+          <h1 className="text-3xl font-bold text-center">Financely</h1>
         </div>
         <Auth
           supabaseClient={supabase}
