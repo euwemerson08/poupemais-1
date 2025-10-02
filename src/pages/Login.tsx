@@ -48,7 +48,6 @@ const Login = () => {
                 password_input_placeholder: 'Sua senha',
                 button_label: 'Entrar',
                 link_text: 'Já tem uma conta? Entrar',
-                forgot_password_link_text: 'Esqueceu sua senha?',
               },
               sign_up: {
                 link_text: 'Não tem uma conta? Cadastre-se',
