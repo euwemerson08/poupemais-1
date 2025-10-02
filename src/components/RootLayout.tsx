@@ -33,6 +33,9 @@ export const RootLayout = () => {
         <main className="flex-1 p-4 sm:p-8 overflow-auto">
           <Outlet />
         </main>
+        <footer className="p-4 text-center text-sm text-gray-500 border-t border-border mt-auto">
+          Por Apice Tecnologia
+        </footer>
       </div>
     </div>
   );
