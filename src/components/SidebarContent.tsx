@@ -26,7 +26,7 @@ export const SidebarContent = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-10">
-        <img src="/app.png" alt="Poupe+ Logo" className="h-8" />
+        <img src="/LOGO.png" alt="Financely Logo" className="h-8" />
       </div>
       <nav className="flex flex-col gap-2 flex-1">
         <NavLink href="/" icon={<LayoutDashboard size={20} />} active={pathname === "/"}>

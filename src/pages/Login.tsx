@@ -22,7 +22,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
         <div className="flex items-center justify-center gap-2">
-          <img src="/app.png" alt="Poupa+ Logo" className="h-8" />
+          <img src="/LOGO.png" alt="Financely Logo" className="h-8" />
         </div>
         <Auth
           supabaseClient={supabase}
