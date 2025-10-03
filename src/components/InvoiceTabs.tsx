@@ -1,254 +1,142 @@
-import { useState, useEffect, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Account } from "@/types/account";
 import { Invoice } from "@/types/invoice";
-import { showError, showSuccess } from "@/utils/toast";
-import { format, parseISO } from "date-fns";
+import { format, addMonths, getMonth, getYear, isSameMonth, isSameYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import { Loader2, CreditCard, Calendar, Info, CheckCircle } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Funções de busca de faturas
-const getOpenAndClosedInvoices = async (accountId: string): Promise<Invoice[]> => {
-  const { data, error } = await supabase
-    .from("invoices")
-    .select("*, transactions(*)")
-    .eq("account_id", accountId)
-    .neq("status", "paid") // Filtra faturas que não estão pagas
-    .order("closing_date", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data as Invoice[];
-};
-
-const getPaidInvoices = async (accountId: string): Promise<Invoice[]> => {
-  const { data, error } = await supabase
-    .from("invoices")
-    .select("*, transactions(*)")
-    .eq("account_id", accountId)
-    .eq("status", "paid") // Apenas faturas pagas
-    .order("closing_date", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data as Invoice[];
-};
-
-const payInvoice = async (invoiceId: string) => {
-  const { error } = await supabase.rpc('pay_invoice', { invoice_id_param: invoiceId });
-  if (error) throw new Error(error.message);
-};
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-};
-
-const formatDate = (dateString: string) => {
-  return format(parseISO(dateString), "dd/MM/yyyy");
-};
-
-interface InvoiceDetailsProps {
-  account: Account;
-  invoices: Invoice[] | undefined;
-  isLoading: boolean;
-  isHistory: boolean;
+interface InvoiceTabsProps {
+  currentMonth: number;
+  currentYear: number;
+  onMonthChange: (month: number, year: number) => void;
+  onSelectInvoice: (invoiceId: string | null) => void;
+  selectedInvoiceId: string | null;
 }
 
-const InvoiceDetails = ({ account, invoices, isLoading, isHistory }: InvoiceDetailsProps) => {
+const getInvoices = async (month: number, year: number): Promise<Invoice[]> => {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("*, accounts(name, type, color, icon)")
+    .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
+    .eq("status", "open")
+    .or(`and(extract(month from due_date).eq.${month},extract(year from due_date).eq.${year}),and(extract(month from closing_date).eq.${month},extract(year from closing_date).eq.${year})`);
+  if (error) throw new Error(error.message);
+  return data.map(inv => ({
+    ...inv,
+    account_name: inv.accounts?.name || 'N/A',
+    account_type: inv.accounts?.type || 'N/A',
+    account_color: inv.accounts?.color || '#000000',
+    account_icon: inv.accounts?.icon || 'Wallet',
+  })) as Invoice[];
+};
+
+export const InvoiceTabs = ({
+  currentMonth,
+  currentYear,
+  onMonthChange,
+  onSelectInvoice,
+  selectedInvoiceId,
+}: InvoiceTabsProps) => {
   const queryClient = useQueryClient();
 
-  const invoicesWithTransactions = useMemo(() => {
-    return invoices?.filter(inv => inv.transactions && inv.transactions.length > 0) ?? [];
-  }, [invoices]);
+  // Fetch invoices for the currently displayed month/year (for the main view)
+  const { data: currentMonthInvoices, isLoading: isLoadingCurrentMonthInvoices } = useQuery({
+    queryKey: ["invoices", currentMonth, currentYear],
+    queryFn: () => getInvoices(currentMonth, currentYear),
+  });
 
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | undefined>();
+  // Determine actual current month and next month for the dropdown
+  const today = new Date();
+  const actualCurrentMonth = getMonth(today) + 1; // 1-indexed
+  const actualCurrentYear = getYear(today);
+  const nextMonthDate = addMonths(today, 1);
+  const actualNextMonth = getMonth(nextMonthDate) + 1;
+  const actualNextYear = getYear(nextMonthDate);
 
-  useEffect(() => {
-    if (invoicesWithTransactions.length > 0 && !selectedInvoiceId) {
-      setSelectedInvoiceId(invoicesWithTransactions[0].id);
-    } else if (invoicesWithTransactions.length === 0) {
-      setSelectedInvoiceId(undefined);
-    }
-  }, [invoicesWithTransactions, selectedInvoiceId]);
-
-  const payMutation = useMutation({
-    mutationFn: payInvoice,
-    onSuccess: () => {
-      showSuccess("Fatura paga com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["invoices", account.id, "open_and_closed"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices", account.id, "paid"] });
-      queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
-    },
-    onError: () => {
-      showError("Erro ao pagar fatura.");
+  // Fetch invoices for the actual current month and next month for the dropdown
+  const { data: dropdownInvoices, isLoading: isLoadingDropdownInvoices } = useQuery({
+    queryKey: ["dropdownInvoices", actualCurrentMonth, actualCurrentYear, actualNextMonth, actualNextYear],
+    queryFn: async () => {
+      const currentMonthData = await getInvoices(actualCurrentMonth, actualCurrentYear);
+      const nextMonthData = await getInvoices(actualNextMonth, actualNextYear);
+      
+      // Combine and remove duplicates (if an invoice appears in both queries)
+      const combined = [...currentMonthData, ...nextMonthData];
+      const uniqueInvoices = Array.from(new Map(combined.map(item => [item.id, item])).values());
+      
+      // Sort by due_date
+      return uniqueInvoices.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
     },
   });
 
-  const selectedInvoice = useMemo(() => {
-    const invoice = invoicesWithTransactions.find((inv) => inv.id === selectedInvoiceId);
-    if (invoice) {
-      const total = invoice.transactions.reduce((sum, tx) => sum + tx.amount, 0);
-      return { ...invoice, total };
+  const handleMonthChange = (direction: "prev" | "next") => {
+    let newMonth = currentMonth;
+    let newYear = currentYear;
+
+    if (direction === "prev") {
+      newMonth--;
+      if (newMonth < 1) {
+        newMonth = 12;
+        newYear--;
+      }
+    } else {
+      newMonth++;
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      }
     }
-    return undefined;
-  }, [invoicesWithTransactions, selectedInvoiceId]);
+    onMonthChange(newMonth, newYear);
+    onSelectInvoice(null); // Reset selected invoice when month changes
+  };
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
+  const monthName = format(new Date(currentYear, currentMonth - 1), "MMMM yyyy", { locale: ptBR });
 
-  if (invoicesWithTransactions.length === 0) {
-    return (
-      <div className="flex flex-col justify-center items-center h-64 bg-card rounded-lg">
-        <CreditCard className="h-12 w-12 text-gray-500 mb-4" />
-        <h3 className="text-xl font-semibold">Nenhuma fatura encontrada</h3>
-        <p className="text-gray-400">Ainda não há faturas com transações para este cartão.</p>
-      </div>
-    );
-  }
+  const handleInvoiceSelect = (value: string) => {
+    onSelectInvoice(value === "all" ? null : value);
+  };
 
   return (
-    <div className="space-y-6">
-      <Select onValueChange={setSelectedInvoiceId} value={selectedInvoiceId}>
+    <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 p-4 bg-card rounded-lg shadow-sm">
+      <div className="flex items-center space-x-2">
+        <Button variant="outline" size="icon" onClick={() => handleMonthChange("prev")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-lg font-semibold min-w-[120px] text-center">{monthName}</span>
+        <Button variant="outline" size="icon" onClick={() => handleMonthChange("next")}>
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <Tabs defaultValue="all" className="w-full sm:w-auto">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all" onClick={() => onSelectInvoice(null)}>Todas as Transações</TabsTrigger>
+          <TabsTrigger value="invoices" onClick={() => onSelectInvoice(dropdownInvoices?.[0]?.id || null)}>Faturas</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <Select onValueChange={handleInvoiceSelect} value={selectedInvoiceId || "all"}>
         <SelectTrigger className="w-full sm:w-72">
           <SelectValue placeholder="Selecione uma fatura" />
         </SelectTrigger>
         <SelectContent>
-          {invoicesWithTransactions.map((invoice) => (
-            <SelectItem key={invoice.id} value={invoice.id}>
-              Fatura de {format(parseISO(invoice.closing_date), "MMMM 'de' yyyy", { locale: ptBR })}
-            </SelectItem>
-          ))}
+          <SelectItem value="all">Todas as Faturas</SelectItem>
+          {isLoadingDropdownInvoices ? (
+            <SelectItem value="loading" disabled>Carregando faturas...</SelectItem>
+          ) : (
+            dropdownInvoices?.map((invoice) => (
+              <SelectItem key={invoice.id} value={invoice.id}>
+                {invoice.account_name} - {format(new Date(invoice.due_date), "MM/yyyy", { locale: ptBR })} ({invoice.status === 'open' ? 'Aberta' : 'Paga'})
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
-
-      {selectedInvoice && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-2xl">{formatCurrency(selectedInvoice.total ?? 0)}</CardTitle>
-                <p className="text-gray-400">Valor total da fatura</p>
-              </div>
-              <Badge variant={selectedInvoice.status === 'paid' ? 'default' : 'destructive'} className={selectedInvoice.status === 'paid' ? 'bg-green-600' : ''}>
-                {selectedInvoice.status === 'open' && 'Em Aberto'}
-                {selectedInvoice.status === 'paid' && 'Paga'}
-                {selectedInvoice.status === 'closed' && 'Fechada'}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <span>Fechamento: <span className="font-semibold">{formatDate(selectedInvoice.closing_date)}</span></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <span>Vencimento: <span className="font-semibold">{formatDate(selectedInvoice.due_date)}</span></span>
-            </div>
-          </CardContent>
-          {!isHistory && selectedInvoice.status !== 'paid' && (
-            <CardFooter>
-              <Button onClick={() => payMutation.mutate(selectedInvoice.id)} disabled={payMutation.isPending}>
-                {payMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                Marcar como Paga
-              </Button>
-            </CardFooter>
-          )}
-        </Card>
-      )}
-
-      {selectedInvoice && selectedInvoice.transactions.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Transações da Fatura</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {selectedInvoice.transactions.map((tx) => (
-                  <TableRow key={tx.id}>
-                    <TableCell>{formatDate(tx.date)}</TableCell>
-                    <TableCell>
-                      {tx.description}
-                      {tx.is_installment && <span className="text-xs text-gray-400 ml-2">{tx.installment_number}/{tx.total_installments}</span>}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">{formatCurrency(tx.amount)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="text-center text-gray-400 py-8">Nenhuma transação nesta fatura.</div>
-      )}
     </div>
-  );
-};
-
-interface InvoiceTabsProps {
-  account: Account;
-}
-
-export const InvoiceTabs = ({ account }: InvoiceTabsProps) => {
-  const { data: openAndClosedInvoices, isLoading: isLoadingOpen } = useQuery({
-    queryKey: ["invoices", account.id, "open_and_closed"],
-    queryFn: () => getOpenAndClosedInvoices(account.id),
-  });
-
-  const { data: paidInvoices, isLoading: isLoadingPaid } = useQuery({
-    queryKey: ["invoices", account.id, "paid"],
-    queryFn: () => getPaidInvoices(account.id),
-  });
-
-  return (
-    <Tabs defaultValue="current" className="mt-4">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="current">Faturas Atuais</TabsTrigger>
-        <TabsTrigger value="history">Histórico</TabsTrigger>
-      </TabsList>
-      <TabsContent value="current">
-        <InvoiceDetails
-          account={account}
-          invoices={openAndClosedInvoices}
-          isLoading={isLoadingOpen}
-          isHistory={false}
-        />
-      </TabsContent>
-      <TabsContent value="history">
-        <InvoiceDetails
-          account={account}
-          invoices={paidInvoices}
-          isLoading={isLoadingPaid}
-          isHistory={true}
-        />
-      </TabsContent>
-    </Tabs>
   );
 };
