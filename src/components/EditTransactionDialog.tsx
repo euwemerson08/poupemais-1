@@ -76,7 +76,7 @@ export const EditTransactionDialog = ({ open, onOpenChange, transaction }: EditT
         description: transaction.description,
         amount: Math.abs(transaction.amount).toFixed(2).replace('.', ','),
         date: parseISO(transaction.date),
-        account_id: transaction.accounts?.id,
+        account_id: transaction.account_id || "", // Corrigido: Usar transaction.account_id diretamente
         category_id: category?.id,
       });
     }
