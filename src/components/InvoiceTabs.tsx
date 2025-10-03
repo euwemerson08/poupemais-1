@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/types/invoice";
-import { format, addMonths, getMonth, getYear, isSameMonth, isSameYear } from "date-fns";
+import { format, addMonths, getMonth, getYear, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -70,7 +70,11 @@ export const InvoiceTabs = ({
       const uniqueInvoices = Array.from(new Map(combined.map(item => [item.id, item])).values());
       
       // Sort by due_date
-      return uniqueInvoices.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+      return uniqueInvoices.sort((a, b) => {
+        const dateA = isValid(parseISO(a.due_date)) ? parseISO(a.due_date).getTime() : 0; // Handle invalid dates
+        const dateB = isValid(parseISO(b.due_date)) ? parseISO(b.due_date).getTime() : 0; // Handle invalid dates
+        return dateA - dateB;
+      });
     },
   });
 
@@ -129,11 +133,15 @@ export const InvoiceTabs = ({
           {isLoadingDropdownInvoices ? (
             <SelectItem value="loading" disabled>Carregando faturas...</SelectItem>
           ) : (
-            dropdownInvoices?.map((invoice) => (
-              <SelectItem key={invoice.id} value={invoice.id}>
-                {invoice.account_name} - {format(new Date(invoice.due_date), "MM/yyyy", { locale: ptBR })} ({invoice.status === 'open' ? 'Aberta' : 'Paga'})
-              </SelectItem>
-            ))
+            dropdownInvoices?.map((invoice) => {
+              const dueDate = parseISO(invoice.due_date);
+              const formattedDueDate = isValid(dueDate) ? format(dueDate, "MM/yyyy", { locale: ptBR }) : 'Data Inválida';
+              return (
+                <SelectItem key={invoice.id} value={invoice.id}>
+                  {invoice.account_name} - {formattedDueDate} ({invoice.status === 'open' ? 'Aberta' : 'Paga'})
+                </SelectItem>
+              );
+            })
           )}
         </SelectContent>
       </Select>
