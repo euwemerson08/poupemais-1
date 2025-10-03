@@ -27,6 +27,9 @@ export const Dashboard = () => {
     );
   }
 
+  const monthlyIncomeValue = data?.monthlyIncome ?? 0;
+  const monthlyExpensesValue = data?.monthlyExpenses ?? 0;
+
   return (
     <div>
       <header>
@@ -43,13 +46,13 @@ export const Dashboard = () => {
         />
         <StatCard
           title="Receitas do Mês"
-          amount={formatCurrency(data?.monthlyIncome ?? 0)}
-          icon={<ArrowUp className="text-green-500" />}
-          amountColor="text-green-500"
+          amount={formatCurrency(monthlyIncomeValue)}
+          icon={monthlyIncomeValue >= 0 ? <ArrowUp className="text-green-500" /> : <ArrowDown className="text-red-500" />}
+          amountColor={monthlyIncomeValue >= 0 ? "text-green-500" : "text-red-500"}
         />
         <StatCard
           title="Despesas do Mês"
-          amount={formatCurrency(data?.monthlyExpenses ?? 0)}
+          amount={formatCurrency(monthlyExpensesValue)}
           icon={<ArrowDown className="text-red-500" />}
           amountColor="text-red-500"
         />

@@ -38,7 +38,7 @@ const getDashboardData = async () => {
 
   // 2. Receitas e Despesas do Mês (Refined)
 
-  // Fixed Expenses for the month (assuming all fixed expenses apply monthly)
+  // Fixed Expenses for the month
   const { data: fixedExpenses, error: fixedExpensesError } = await supabase
     .from("fixed_expenses")
     .select("amount");
@@ -148,10 +148,12 @@ const getDashboardData = async () => {
   const totalRecurringReceivablesAmount = recurringReceivables.reduce((sum, rr) => sum + rr.amount, 0);
   totalReceivablesAmount += totalRecurringReceivablesAmount; // Add recurring to total
 
-  // Final monthly income and expenses
-  const monthlyIncome = monthlyIncomeNonCC + totalReceivablesAmount;
-  const monthlyExpenses = totalFixedExpensesAmount + monthlyExpensesNonCC + totalCreditCardInvoiceExpenses;
+  // Calculate total gross income and total gross expenses for the month
+  const totalGrossIncome = monthlyIncomeNonCC + totalReceivablesAmount;
+  const totalGrossExpenses = totalFixedExpensesAmount + monthlyExpensesNonCC + totalCreditCardInvoiceExpenses;
 
+  // The new "Receita do Mês" is the net result
+  const netMonthlyResult = totalGrossIncome - totalGrossExpenses;
 
   // 3. Dados para o OverviewChart (últimos 6 meses)
   const chartData: MonthlySummary[] = [];
@@ -231,8 +233,8 @@ const getDashboardData = async () => {
 
     chartData.push({
       name: format(month, "MMM", { locale: ptBR }),
-      Receitas: periodIncome,
-      Despesas: periodExpenses,
+      Receitas: periodIncome, // Chart still shows gross income
+      Despesas: periodExpenses, // Chart still shows gross expenses
     });
   }
 
@@ -249,8 +251,8 @@ const getDashboardData = async () => {
 
   return {
     totalBalance,
-    monthlyIncome,
-    monthlyExpenses,
+    monthlyIncome: netMonthlyResult, // This is now the net result
+    monthlyExpenses: totalGrossExpenses, // This is the total gross expenses for the card
     totalReceivablesAmount,
     chartData,
     recentTransactions: recentTransactions as Transaction[],
