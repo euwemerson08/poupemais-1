@@ -48,12 +48,12 @@ const Login = () => {
                 password_input_placeholder: 'Sua senha',
                 button_label: 'Entrar',
                 link_text: 'Já tem uma conta? Entrar',
-                forgot_password_link_text: 'Esqueceu sua senha?',
+                forgot_password_link: 'Esqueceu sua senha?', // Corrigido aqui
               },
               sign_up: {
                 link_text: 'Não tem uma conta? Cadastre-se',
               },
-              forgotten_password: { // Adicionando traduções para a tela de recuperação de senha
+              forgotten_password: {
                 email_label: 'Endereço de e-mail',
                 email_input_placeholder: 'Seu endereço de e-mail',
                 button_label: 'Enviar instruções de redefinição de senha',
