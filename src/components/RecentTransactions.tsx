@@ -48,6 +48,7 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
             <p className="text-gray-400 text-center">Nenhuma transação recente.</p>
           ) : (
             transactions.map((transaction) => {
+              console.log("RecentTransactions - Transaction amount:", transaction.amount); // Debug log
               const categoryName = transaction.category_name || (transaction.amount > 0 ? 'Recebimentos' : 'Outros');
               const Icon = categoryIconMap[categoryName] || MoreHorizontal;
               const styles = categoryStyles[categoryName] || categoryStyles['Outros'];

@@ -103,6 +103,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          console.log("TransactionItem - Transaction amount:", transaction.amount); // Debug log
           <p className={`font-semibold ${isIncome ? "text-green-500" : "text-red-500"}`}>
             {formatCurrency(transaction.amount)}
           </p>

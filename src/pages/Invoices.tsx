@@ -84,11 +84,21 @@ const Invoices = () => {
     targetClosingDate.setHours(0, 0, 0, 0);
 
     // Find the invoice that matches this calculated targetClosingDate and is 'open'
-    return allInvoices.find(inv => {
+    const foundInvoice = allInvoices.find(inv => {
       const invoiceClosingDate = parseISO(inv.closing_date);
       invoiceClosingDate.setHours(0, 0, 0, 0); // Normalize for comparison
       return inv.status === 'open' && invoiceClosingDate.getTime() === targetClosingDate.getTime();
     });
+
+    console.log("Invoices.tsx - currentOpenInvoice debug:");
+    console.log("  Selected Card ID:", selectedCardId);
+    console.log("  Current Card Closing Day:", currentCard.closing_day);
+    console.log("  Today:", today.toISOString());
+    console.log("  Calculated Target Closing Date:", targetClosingDate.toISOString());
+    console.log("  All Invoices:", allInvoices.map(inv => ({ id: inv.id, status: inv.status, closing_date: inv.closing_date })));
+    console.log("  Found Open Invoice:", foundInvoice ? { id: foundInvoice.id, status: foundInvoice.status, closing_date: foundInvoice.closing_date } : "None");
+
+    return foundInvoice;
   }, [allInvoices, selectedCardId, creditCards]);
 
   if (isLoadingCreditCards || isLoadingInvoices) {
