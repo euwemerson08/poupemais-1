@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvoiceDisplay } from "@/components/InvoiceDisplay";
 import { InvoiceTransactionsTable } from "@/components/InvoiceTransactionsTable";
 import { InvoiceHistory } from "@/components/InvoiceHistory";
+import { parseISO } from "date-fns";
 
 const getCreditCards = async (): Promise<Account[]> => {
   const { data, error } = await supabase.from("accounts").select("*").eq("type", "credit_card");
@@ -54,8 +55,41 @@ const Invoices = () => {
   };
 
   const currentOpenInvoice = useMemo(() => {
-    return allInvoices?.find(inv => inv.status === 'open');
-  }, [allInvoices]);
+    if (!allInvoices || !selectedCardId || !creditCards) return undefined;
+
+    const currentCard = creditCards.find(card => card.id === selectedCardId);
+    if (!currentCard || !currentCard.closing_day) return undefined;
+
+    const today = new Date();
+    const closingDay = currentCard.closing_day;
+
+    let targetClosingDate: Date;
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth(); // 0-indexed
+    const currentYear = today.getFullYear();
+
+    // Determine the effective closing day for the current month
+    const lastDayOfCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const effectiveClosingDay = Math.min(closingDay, lastDayOfCurrentMonth);
+
+    if (currentDay > effectiveClosingDay) {
+      // If today is after the closing day, the current open invoice is for the next month's cycle
+      targetClosingDate = new Date(currentYear, currentMonth + 1, effectiveClosingDay);
+    } else {
+      // If today is on or before the closing day, the current open invoice is for the current month's cycle
+      targetClosingDate = new Date(currentYear, currentMonth, effectiveClosingDay);
+    }
+
+    // Normalize targetClosingDate to start of day for comparison
+    targetClosingDate.setHours(0, 0, 0, 0);
+
+    // Find the invoice that matches this calculated targetClosingDate and is 'open'
+    return allInvoices.find(inv => {
+      const invoiceClosingDate = parseISO(inv.closing_date);
+      invoiceClosingDate.setHours(0, 0, 0, 0); // Normalize for comparison
+      return inv.status === 'open' && invoiceClosingDate.getTime() === targetClosingDate.getTime();
+    });
+  }, [allInvoices, selectedCardId, creditCards]);
 
   if (isLoadingCreditCards || isLoadingInvoices) {
     return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
