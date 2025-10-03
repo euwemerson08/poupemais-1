@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/types/invoice";
 import { Account } from "@/types/account"; // Importar o tipo Account
-import { format, addMonths, getMonth, getYear, parseISO, isValid } from "date-fns";
+import { format, addMonths, subMonths, getMonth, getYear, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
