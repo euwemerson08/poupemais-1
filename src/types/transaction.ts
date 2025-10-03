@@ -1,4 +1,4 @@
-import { Database } from "./supabase";
+import { Database } from "../types/supabase";
 
 // Type for the raw transaction row from the database
 type RawTransaction = Database['public']['Tables']['transactions']['Row'];
