@@ -88,11 +88,6 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
     setIsDeleteDialogOpen(false);
   };
 
-  // Determine the date to display based on whether it's an installment
-  const displayDate = transaction.is_installment && transaction.invoice_due_date
-    ? parseISO(transaction.invoice_due_date)
-    : parseISO(transaction.date);
-
   return (
     <>
       <div className="flex items-center justify-between py-4">
@@ -101,16 +96,9 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
             {Icon ? <Icon className={cn("h-5 w-5", styles.text)} /> : <MoreHorizontal className={cn("h-5 w-5", styles.text)} />}
           </div>
           <div>
-            <p className="font-medium">
-              {transaction.description}
-              {transaction.is_installment && transaction.installment_number && transaction.total_installments && (
-                <span className="text-xs text-gray-400 ml-2">
-                  ({transaction.installment_number}/{transaction.total_installments})
-                </span>
-              )}
-            </p>
+            <p className="font-medium">{transaction.description}</p>
             <p className="text-sm text-gray-400">
-              {transaction.account_name} · {format(displayDate, "dd/MM/yyyy")}
+              {transaction.accounts?.name} · {format(parseISO(transaction.date), "dd/MM/yyyy")}
             </p>
           </div>
         </div>

@@ -22,7 +22,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-lg shadow-lg">
         <div className="flex items-center justify-center gap-2">
-          <img src="/LOGO.png" alt="Poupe + Logo" className="h-8" />
+          <img src="/LOGO.png" alt="Financely Logo" className="h-8" />
         </div>
         <Auth
           supabaseClient={supabase}
@@ -48,6 +48,7 @@ const Login = () => {
                 password_input_placeholder: 'Sua senha',
                 button_label: 'Entrar',
                 link_text: 'Já tem uma conta? Entrar',
+                forgot_password_link_text: 'Esqueceu sua senha?',
               },
               sign_up: {
                 link_text: 'Não tem uma conta? Cadastre-se',
