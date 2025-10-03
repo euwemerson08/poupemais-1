@@ -23,22 +23,29 @@ const getDashboardData = async () => {
   // 1. Saldo Total
   const { data: accounts, error: accountsError } = await supabase
     .from("accounts")
-    .select("id, name, type, balance, closing_day"); // Select closing_day for invoice calculation
+    .select("id, name, type, balance, closing_day");
   if (accountsError) {
     showError("Erro ao buscar saldo total.");
     throw new Error(accountsError.message);
   }
   const totalBalance = accounts.reduce((sum, acc) => {
     if (acc.type === 'credit_card') {
-      // Credit card balance represents debt, so subtract it from total balance
       return sum - acc.balance;
     }
     return sum + acc.balance;
   }, 0);
 
-  // 2. Receitas e Despesas do Mês (Refined)
+  // --- NOVA LÓGICA PARA "RECEITA DO MÊS" ---
+  // 1. Somar os saldos atuais da Carteira (Wallet) e Conta Digital (Checking)
+  let totalWalletCheckingBalance = 0;
+  accounts.forEach(acc => {
+    if (acc.type === 'wallet' || acc.type === 'checking') {
+      totalWalletCheckingBalance += acc.balance;
+    }
+  });
 
-  // Fixed Expenses for the month
+  // 2. Calcular Despesas do Mês (fixas + avulsas + faturas de cartão)
+  // Despesas Fixas
   const { data: fixedExpenses, error: fixedExpensesError } = await supabase
     .from("fixed_expenses")
     .select("amount");
@@ -48,7 +55,7 @@ const getDashboardData = async () => {
   }
   const totalFixedExpensesAmount = fixedExpenses.reduce((sum, fe) => sum + fe.amount, 0);
 
-  // Non-credit card transactions for the current month
+  // Transações não-cartão de crédito para o mês atual (apenas despesas)
   const { data: monthlyTransactions, error: monthlyTransactionsError } = await supabase
     .from("transactions")
     .select("amount, account_id")
@@ -59,21 +66,18 @@ const getDashboardData = async () => {
     throw new Error(monthlyTransactionsError.message);
   }
 
-  let monthlyIncomeNonCC = 0;
   let monthlyExpensesNonCC = 0;
   const creditCardAccountIds = new Set(accounts.filter(acc => acc.type === 'credit_card').map(acc => acc.id));
 
   monthlyTransactions.forEach(tx => {
-    if (!creditCardAccountIds.has(tx.account_id)) { // Only count non-credit card transactions here
-      if (tx.amount > 0) {
-        monthlyIncomeNonCC += tx.amount;
-      } else {
+    if (!creditCardAccountIds.has(tx.account_id)) {
+      if (tx.amount < 0) { // Apenas valores negativos são despesas
         monthlyExpensesNonCC += Math.abs(tx.amount);
       }
     }
   });
 
-  // Credit Card Invoice Expenses for the current month
+  // Despesas de Faturas de Cartão de Crédito para o mês atual
   let totalCreditCardInvoiceExpenses = 0;
   const creditCards = accounts.filter(acc => acc.type === 'credit_card');
 
@@ -82,21 +86,18 @@ const getDashboardData = async () => {
 
     let targetClosingDate: Date;
     const currentDay = today.getDate();
-    const currentMonth = today.getMonth(); // 0-indexed
+    const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
 
-    // Determine the effective closing day for the current month
     const lastDayOfCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const effectiveClosingDay = Math.min(card.closing_day, lastDayOfCurrentMonth);
 
     if (currentDay > effectiveClosingDay) {
-      // If today is after the closing day, the current open invoice is for the next month's cycle
       targetClosingDate = new Date(currentYear, currentMonth + 1, effectiveClosingDay);
     } else {
-      // If today is on or before the closing day, the current open invoice is for the current month's cycle
       targetClosingDate = new Date(currentYear, currentMonth, effectiveClosingDay);
     }
-    targetClosingDate.setHours(0, 0, 0, 0); // Normalize for comparison
+    targetClosingDate.setHours(0, 0, 0, 0);
 
     const { data: currentInvoiceData, error: invoiceError } = await supabase
       .from("invoices")
@@ -106,7 +107,7 @@ const getDashboardData = async () => {
       .eq("status", "open")
       .single();
 
-    if (invoiceError && invoiceError.code !== 'PGRST116') { // PGRST116 means no rows found
+    if (invoiceError && invoiceError.code !== 'PGRST116') {
       showError(`Erro ao buscar fatura atual para ${card.name}.`);
       throw new Error(invoiceError.message);
     }
@@ -119,43 +120,37 @@ const getDashboardData = async () => {
     }
   }
 
-  // Fetch Pending Receivables for the current month
-  const { data: monthlyPendingReceivables, error: receivablesError } = await supabase
-    .from("receivables")
-    .select("amount")
-    .eq("status", "pending")
-    .gte("due_date", startOfCurrentMonth)
-    .lte("due_date", endOfCurrentMonth);
-  if (receivablesError) {
-    showError("Erro ao buscar contas a receber do mês.");
-    throw new Error(receivablesError.message);
-  }
-  let totalReceivablesAmount = monthlyPendingReceivables.reduce((sum, r) => sum + r.amount, 0);
-
-  // Fetch Recurring Receivables active in the current month
-  const { data: recurringReceivables, error: recurringReceivablesError } = await supabase
-    .from("recurring_receivables")
-    .select("amount")
-    .lte("start_date", endOfCurrentMonth) // Starts before or in current month
-    .or(`end_date.is.null,end_date.gte.${startOfCurrentMonth}`) // Ends after or in current month, or never ends
-    .eq("recurrence_interval", "monthly"); // Only monthly recurring
-  
-  if (recurringReceivablesError) {
-    showError("Erro ao buscar recebimentos recorrentes.");
-    throw new Error(recurringReceivablesError.message);
-  }
-
-  const totalRecurringReceivablesAmount = recurringReceivables.reduce((sum, rr) => sum + rr.amount, 0);
-  totalReceivablesAmount += totalRecurringReceivablesAmount; // Add recurring to total
-
-  // Calculate total gross income and total gross expenses for the month
-  const totalGrossIncome = monthlyIncomeNonCC + totalReceivablesAmount;
   const totalGrossExpenses = totalFixedExpensesAmount + monthlyExpensesNonCC + totalCreditCardInvoiceExpenses;
 
-  // The new "Receita do Mês" is the net result
-  const netMonthlyResult = totalGrossIncome - totalGrossExpenses;
+  // "Receita do Mês" = (Saldo atual da Carteira + Saldo atual da Conta Digital) - Despesas do Mês
+  const netMonthlyResult = totalWalletCheckingBalance - totalGrossExpenses;
+  // --- FIM DA NOVA LÓGICA PARA "RECEITA DO MÊS" ---
 
-  // 3. Dados para o OverviewChart (últimos 6 meses)
+  // 3. Total a Receber (todos os recebíveis pendentes, independentemente do mês)
+  const { data: allPendingReceivables, error: allReceivablesError } = await supabase
+    .from("receivables")
+    .select("amount")
+    .eq("status", "pending");
+  if (allReceivablesError) {
+    showError("Erro ao buscar todas as contas a receber.");
+    throw new Error(allReceivablesError.message);
+  }
+  let totalReceivablesAmount = allPendingReceivables.reduce((sum, r) => sum + r.amount, 0);
+
+  const { data: allRecurringReceivables, error: allRecurringReceivablesError } = await supabase
+    .from("recurring_receivables")
+    .select("amount")
+    .or(`end_date.is.null,end_date.gte.${format(today, "yyyy-MM-dd")}`);
+  
+  if (allRecurringReceivablesError) {
+    showError("Erro ao buscar todos os recebimentos recorrentes.");
+    throw new Error(allRecurringReceivablesError.message);
+  }
+
+  const allTotalRecurringReceivablesAmount = allRecurringReceivables.reduce((sum, rr) => sum + rr.amount, 0);
+  totalReceivablesAmount += allTotalRecurringReceivablesAmount;
+
+  // 4. Dados para o OverviewChart (últimos 6 meses) - Mantém a lógica de fluxo de caixa mensal
   const chartData: MonthlySummary[] = [];
   for (let i = 5; i >= 0; i--) {
     const month = subMonths(today, i);
@@ -174,7 +169,7 @@ const getDashboardData = async () => {
     }
 
     let periodIncome = 0;
-    let periodExpenses = totalFixedExpensesAmount; // Add fixed expenses to each month's expenses for chart
+    let periodExpenses = totalFixedExpensesAmount; // Adiciona despesas fixas a cada mês para o gráfico
 
     const periodCreditCardAccountIds = new Set(accounts.filter(acc => acc.type === 'credit_card').map(acc => acc.id));
 
@@ -188,7 +183,6 @@ const getDashboardData = async () => {
       }
     }
 
-    // Add credit card invoice expenses for the chart month
     let periodCreditCardInvoiceExpenses = 0;
     for (const card of creditCards) {
       if (!card.closing_day) continue;
@@ -213,7 +207,7 @@ const getDashboardData = async () => {
         .select("*, transactions(amount)")
         .eq("account_id", card.id)
         .eq("closing_date", format(chartTargetClosingDate, "yyyy-MM-dd"))
-        .eq("status", "open") // Only open invoices contribute to current month's expenses
+        .eq("status", "open")
         .single();
 
       if (chartInvoiceError && chartInvoiceError.code !== 'PGRST116') {
@@ -230,15 +224,43 @@ const getDashboardData = async () => {
     }
     periodExpenses += periodCreditCardInvoiceExpenses;
 
+    const { data: chartPendingReceivables, error: chartReceivablesError } = await supabase
+      .from("receivables")
+      .select("amount")
+      .eq("status", "pending")
+      .gte("due_date", monthStart)
+      .lte("due_date", monthEnd);
+    if (chartReceivablesError) {
+      showError("Erro ao buscar contas a receber para o gráfico.");
+      throw new Error(chartReceivablesError.message);
+    }
+    let chartTotalReceivablesAmount = chartPendingReceivables.reduce((sum, r) => sum + r.amount, 0);
+
+    const { data: chartRecurringReceivables, error: chartRecurringReceivablesError } = await supabase
+      .from("recurring_receivables")
+      .select("amount")
+      .lte("start_date", monthEnd)
+      .or(`end_date.is.null,end_date.gte.${monthStart}`)
+      .eq("recurrence_interval", "monthly");
+    
+    if (chartRecurringReceivablesError) {
+      showError("Erro ao buscar recebimentos recorrentes para o gráfico.");
+      throw new Error(chartRecurringReceivablesError.message);
+    }
+
+    const chartTotalRecurringReceivablesAmount = chartRecurringReceivables.reduce((sum, rr) => sum + rr.amount, 0);
+    chartTotalReceivablesAmount += chartTotalRecurringReceivablesAmount;
+
+    periodIncome += chartTotalReceivablesAmount;
 
     chartData.push({
       name: format(month, "MMM", { locale: ptBR }),
-      Receitas: periodIncome, // Chart still shows gross income
-      Despesas: periodExpenses, // Chart still shows gross expenses
+      Receitas: periodIncome,
+      Despesas: periodExpenses,
     });
   }
 
-  // 4. Transações Recentes
+  // 5. Transações Recentes
   const { data: recentTransactions, error: recentTransactionsError } = await supabase
     .from("transactions")
     .select("*, accounts(id, name, type)")
@@ -251,9 +273,9 @@ const getDashboardData = async () => {
 
   return {
     totalBalance,
-    monthlyIncome: netMonthlyResult, // This is now the net result
-    monthlyExpenses: totalGrossExpenses, // This is the total gross expenses for the card
-    totalReceivablesAmount,
+    monthlyIncome: netMonthlyResult, // Agora é (Saldo atual da Carteira + Saldo atual da Conta Digital) - Despesas do Mês
+    monthlyExpenses: totalGrossExpenses, // Total de despesas brutas do mês
+    totalReceivablesAmount, // Total de todos os recebíveis pendentes
     chartData,
     recentTransactions: recentTransactions as Transaction[],
   };
