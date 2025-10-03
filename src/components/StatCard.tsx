@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useVisibility } from "@/contexts/VisibilityContext"; // Importar useVisibility
 
 interface StatCardProps {
   title: string;
@@ -9,6 +10,8 @@ interface StatCardProps {
 }
 
 export const StatCard = ({ title, amount, icon, amountColor }: StatCardProps) => {
+  const { showAmounts } = useVisibility(); // Usar o hook de visibilidade
+
   return (
     <Card className="bg-card border-none">
       <CardHeader className="pb-2">
@@ -17,7 +20,7 @@ export const StatCard = ({ title, amount, icon, amountColor }: StatCardProps) =>
       <CardContent>
         <div className={cn("text-3xl font-bold flex items-center gap-2", amountColor)}>
           {icon}
-          {amount}
+          {showAmounts ? amount : "R$ ****"} {/* Condicionalmente mostrar valor ou placeholder */}
         </div>
       </CardContent>
     </Card>

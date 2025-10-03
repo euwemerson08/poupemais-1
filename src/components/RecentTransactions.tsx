@@ -4,6 +4,7 @@ import { Transaction } from "@/types/transaction";
 import { format, parseISO } from "date-fns";
 import { categories } from "./CategoryPicker";
 import { cn } from "@/lib/utils";
+import { useVisibility } from "@/contexts/VisibilityContext"; // Importar useVisibility
 
 const categoryIconMap: { [key: string]: LucideIcon } = {
   'Alimentação': UtensilsCrossed, 'Moradia': Car, 'Transporte': Car, 'Lazer': Film,
@@ -33,6 +34,8 @@ interface RecentTransactionsProps {
 }
 
 export const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+  const { showAmounts } = useVisibility(); // Usar o hook de visibilidade
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Math.abs(value));
   };
@@ -65,8 +68,7 @@ export const RecentTransactions = ({ transactions }: RecentTransactionsProps) =>
                     </div>
                   </div>
                   <p className={`font-semibold ${isIncome ? "text-green-500" : "text-red-500"}`}>
-                    {isIncome ? "+ " : "- "}
-                    {formatCurrency(transaction.amount)}
+                    {showAmounts ? (isIncome ? "+ " : "- ") + formatCurrency(transaction.amount) : "R$ ****"} {/* Condicionalmente mostrar valor ou placeholder */}
                   </p>
                 </div>
               );

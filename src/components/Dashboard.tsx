@@ -1,8 +1,10 @@
 import { StatCard } from "./StatCard";
 import { OverviewChart } from "./OverviewChart";
 import { RecentTransactions } from "./RecentTransactions";
-import { ArrowUp, ArrowDown, Loader2, Wallet } from "lucide-react"; // Importar Wallet para o ícone
+import { ArrowUp, ArrowDown, Loader2, Wallet, Eye, EyeOff } from "lucide-react"; // Importar Eye e EyeOff
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useVisibility } from "@/contexts/VisibilityContext"; // Importar useVisibility
+import { Button } from "@/components/ui/button"; // Importar Button
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -10,6 +12,7 @@ const formatCurrency = (value: number) => {
 
 export const Dashboard = () => {
   const { data, isLoading, error } = useDashboardData();
+  const { showAmounts, toggleAmountsVisibility } = useVisibility(); // Usar o hook de visibilidade
 
   if (isLoading) {
     return (
@@ -32,11 +35,17 @@ export const Dashboard = () => {
 
   return (
     <div>
-      <header>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-400 mt-1">
-          Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
-        </p>
+      <header className="flex justify-between items-center"> {/* Ajuste para alinhar o título e o botão */}
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-400 mt-1">
+            Bem-vindo(a) de volta! Aqui está um resumo das suas finanças.
+          </p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={toggleAmountsVisibility}>
+          {showAmounts ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          <span className="sr-only">{showAmounts ? "Esconder valores" : "Mostrar valores"}</span>
+        </Button>
       </header>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
