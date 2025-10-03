@@ -2,27 +2,29 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "@/types/invoice";
-import { Account } from "@/types/account"; // Importar o tipo Account
+import { Account } from "@/types/account";
 import { format, addMonths, subMonths, getMonth, getYear, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { showSuccess, showError } from "@/utils/toast";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Adicionado Card para a estrutura
-import { TransactionItem } from "./TransactionItem"; // Adicionado TransactionItem
-import { Separator } from "@/components/ui/separator"; // Adicionado Separator
-import { Loader2, Info } from "lucide-react"; // Adicionado Loader2 e Info
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TransactionItem } from "./TransactionItem";
+import { Loader2, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface InvoiceTabsProps {
-  account: Account; // Agora aceita um objeto Account
+  account: Account;
 }
 
 const getInvoicesForAccount = async (accountId: string, month: number, year: number): Promise<Invoice[]> => {
   const { data, error } = await supabase
     .from("invoices")
-    .select("*, accounts(name, type, color, icon, balance, limit, closing_day, due_day), transactions(*)") // Selecionar transações também
+    .select("*, accounts(name, type, color, icon, balance, limit, closing_day, due_day), transactions(*)")
     .eq("account_id", accountId)
     .eq("user_id", (await supabase.auth.getUser()).data.user?.id)
     .or(`and(extract(month from due_date).eq.${month},extract(year from due_date).eq.${year}),and(extract(month from closing_date).eq.${month},extract(year from closing_date).eq.${year})`)
@@ -40,7 +42,7 @@ const getInvoicesForAccount = async (accountId: string, month: number, year: num
     account_limit: inv.accounts?.limit || null,
     account_closing_day: inv.accounts?.closing_day || null,
     account_due_day: inv.accounts?.due_day || null,
-    transactions: inv.transactions || [], // Garantir que transactions é um array
+    transactions: inv.transactions || [],
   })) as Invoice[];
 };
 
@@ -51,51 +53,51 @@ export const InvoiceTabs = ({ account }: InvoiceTabsProps) => {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "invoices">("all");
 
+  const [closingDayInput, setClosingDayInput] = useState<number | string>(account.closing_day || '');
+  const [dueDayInput, setDueDayInput] = useState<number | string>(account.due_day || '');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  useEffect(() => {
+    setClosingDayInput(account.closing_day || '');
+    setDueDayInput(account.due_day || '');
+    setSelectedInvoiceId(null);
+    setActiveTab("all");
+  }, [account.id, account.closing_day, account.due_day]);
+
   const currentMonth = getMonth(currentDate) + 1;
   const currentYear = getYear(currentDate);
 
-  // Fetch invoices for the currently displayed month/year (for the main view)
   const { data: invoices, isLoading: isLoadingInvoices } = useQuery({
     queryKey: ["invoices", account.id, currentMonth, currentYear],
     queryFn: () => getInvoicesForAccount(account.id, currentMonth, currentYear),
   });
 
-  // Determine actual current month and next month for the dropdown
-  const actualCurrentMonth = getMonth(today) + 1; // 1-indexed
+  const actualCurrentMonth = getMonth(today) + 1;
   const actualCurrentYear = getYear(today);
   const nextMonthDate = addMonths(today, 1);
   const actualNextMonth = getMonth(nextMonthDate) + 1;
   const actualNextYear = getYear(nextMonthDate);
 
-  // Fetch invoices for the actual current month and next month for the dropdown
   const { data: dropdownInvoices, isLoading: isLoadingDropdownInvoices } = useQuery({
     queryKey: ["dropdownInvoices", account.id, actualCurrentMonth, actualCurrentYear, actualNextMonth, actualNextYear],
     queryFn: async () => {
       const currentMonthData = await getInvoicesForAccount(account.id, actualCurrentMonth, actualCurrentYear);
       const nextMonthData = await getInvoicesForAccount(account.id, actualNextMonth, actualNextYear);
       
-      // Combine and remove duplicates (if an invoice appears in both queries)
       const combined = [...currentMonthData, ...nextMonthData];
       const uniqueInvoices = Array.from(new Map(combined.map(item => [item.id, item])).values());
       
-      // Sort by due_date
       return uniqueInvoices.sort((a, b) => {
-        const dateA = isValid(parseISO(a.due_date)) ? parseISO(a.due_date).getTime() : 0; // Handle invalid dates
-        const dateB = isValid(parseISO(b.due_date)) ? parseISO(b.due_date).getTime() : 0; // Handle invalid dates
+        const dateA = isValid(parseISO(a.due_date)) ? parseISO(a.due_date).getTime() : 0;
+        const dateB = isValid(parseISO(b.due_date)) ? parseISO(b.due_date).getTime() : 0;
         return dateA - dateB;
       });
     },
   });
 
-  useEffect(() => {
-    // Reset selected invoice when account changes
-    setSelectedInvoiceId(null);
-    setActiveTab("all");
-  }, [account.id]);
-
   const handleMonthChange = (direction: "prev" | "next") => {
     setCurrentDate((prevDate) => (direction === "prev" ? subMonths(prevDate, 1) : addMonths(prevDate, 1)));
-    setSelectedInvoiceId(null); // Reset selected invoice when month changes
+    setSelectedInvoiceId(null);
     setActiveTab("all");
   };
 
@@ -106,12 +108,80 @@ export const InvoiceTabs = ({ account }: InvoiceTabsProps) => {
     setActiveTab("invoices");
   };
 
+  const handleSaveAccountSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      const parsedClosingDay = typeof closingDayInput === 'string' ? parseInt(closingDayInput, 10) : closingDayInput;
+      const parsedDueDay = typeof dueDayInput === 'string' ? parseInt(dueDayInput, 10) : dueDayInput;
+
+      if (isNaN(parsedClosingDay) || parsedClosingDay < 1 || parsedClosingDay > 31) {
+        showError("Dia de Fechamento inválido. Deve ser um número entre 1 e 31.");
+        return;
+      }
+      if (isNaN(parsedDueDay) || parsedDueDay < 1 || parsedDueDay > 31) {
+        showError("Dia de Vencimento inválido. Deve ser um número entre 1 e 31.");
+        return;
+      }
+
+      const { error } = await supabase.rpc('update_account_closing_days', {
+        p_account_id: account.id,
+        p_closing_day: parsedClosingDay,
+        p_due_day: parsedDueDay,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      showSuccess("Configurações do cartão atualizadas com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["creditCards"] }); // Invalida para re-buscar as contas
+    } catch (error: any) {
+      showError(`Erro ao salvar configurações: ${error.message}`);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   const displayedInvoices = selectedInvoiceId
     ? invoices?.filter(inv => inv.id === selectedInvoiceId)
     : invoices;
 
   return (
     <div className="space-y-6">
+      <Card className="bg-card border-border p-4 mb-6">
+        <CardTitle className="text-xl mb-4">Configurações do Cartão</CardTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label htmlFor="closing-day">Dia de Fechamento</Label>
+            <Input
+              id="closing-day"
+              type="number"
+              min="1"
+              max="31"
+              value={closingDayInput}
+              onChange={(e) => setClosingDayInput(e.target.value)}
+              placeholder="Ex: 15"
+            />
+          </div>
+          <div>
+            <Label htmlFor="due-day">Dia de Vencimento</Label>
+            <Input
+              id="due-day"
+              type="number"
+              min="1"
+              max="31"
+              value={dueDayInput}
+              onChange={(e) => setDueDayInput(e.target.value)}
+              placeholder="Ex: 25"
+            />
+          </div>
+        </div>
+        <Button onClick={handleSaveAccountSettings} disabled={isSavingSettings}>
+          {isSavingSettings ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Salvar Configurações
+        </Button>
+      </Card>
+
       <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4 p-4 bg-card rounded-lg shadow-sm">
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="icon" onClick={() => handleMonthChange("prev")}>
