@@ -23,7 +23,9 @@ const getTransactions = async (): Promise<GroupedTransactions[]> => {
 
   const groupedTransactions: { [key: string]: Transaction[] } = {};
   (data as Transaction[]).forEach(tx => {
-    const monthYear = format(parseISO(tx.date), "MMMM yyyy", { locale: ptBR });
+    // Use invoice_due_date for installments, otherwise use transaction.date
+    const dateToGroup = tx.is_installment && tx.invoice_due_date ? tx.invoice_due_date : tx.date;
+    const monthYear = format(parseISO(dateToGroup), "MMMM yyyy", { locale: ptBR });
     if (!groupedTransactions[monthYear]) {
       groupedTransactions[monthYear] = [];
     }
