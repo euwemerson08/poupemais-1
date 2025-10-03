@@ -26,7 +26,8 @@ const getDashboardData = async () => {
   }
   const totalBalance = accounts.reduce((sum, acc) => {
     if (acc.type === 'credit_card') {
-      return sum + acc.balance;
+      // Credit card balance represents debt, so subtract it from total balance
+      return sum - acc.balance;
     }
     return sum + acc.balance;
   }, 0);

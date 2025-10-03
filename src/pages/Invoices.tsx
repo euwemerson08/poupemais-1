@@ -81,6 +81,7 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
     onSuccess: () => {
       showSuccess("Fatura paga com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["invoices", account.id] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] }); // Invalidate accounts to update balance
     },
     onError: () => {
       showError("Erro ao pagar fatura.");
@@ -90,6 +91,7 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
   const selectedInvoice = useMemo(() => {
     const invoice = invoicesWithTransactions.find((inv) => inv.id === selectedInvoiceId);
     if (invoice) {
+      // Sum of transaction amounts (which are negative for expenses)
       const total = invoice.transactions.reduce((sum, tx) => sum + tx.amount, 0);
       return { ...invoice, total };
     }
@@ -130,7 +132,8 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-2xl">{formatCurrency(selectedInvoice.total ?? 0)}</CardTitle>
+                {/* Display absolute value of total for invoices */}
+                <CardTitle className="text-2xl">{formatCurrency(Math.abs(selectedInvoice.total ?? 0))}</CardTitle>
                 <p className="text-gray-400">Valor total da fatura</p>
               </div>
               <Badge variant={selectedInvoice.status === 'paid' ? 'default' : 'destructive'} className={selectedInvoice.status === 'paid' ? 'bg-green-600' : ''}>
@@ -183,7 +186,8 @@ const InvoiceDetails = ({ account }: { account: Account }) => {
                       {tx.description}
                       {tx.is_installment && <span className="text-xs text-gray-400 ml-2">{tx.installment_number}/{tx.total_installments}</span>}
                     </TableCell>
-                    <TableCell className="text-right font-medium">{formatCurrency(tx.amount)}</TableCell>
+                    {/* Display absolute value of transaction amount for invoice details */}
+                    <TableCell className="text-right font-medium">{formatCurrency(Math.abs(tx.amount))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
